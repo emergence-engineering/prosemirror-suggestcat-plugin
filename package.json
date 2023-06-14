@@ -1,0 +1,19 @@
+{
+  "name": "prosemirror-suggestcat-plugin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emergence-engineering/prosemirror-suggestcat-plugin.git"
+  },
+  "author": "matejcsok-istvan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emergence-engineering/prosemirror-suggestcat-plugin/issues"
+  },
+  "homepage": "https://github.com/emergence-engineering/prosemirror-suggestcat-plugin#readme"
+}
