@@ -6,7 +6,7 @@ import copy from "rollup-plugin-copy";
 import pkg from "./package.json";
 
 export default {
-  name: "prosemirror-link-preview",
+  name: "prosemirror-suggestcat-plugin",
   input: "src/index.ts",
   output: [
     {

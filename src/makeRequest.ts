@@ -22,7 +22,10 @@ const isJsonString = (str: string) => {
   return true;
 };
 
-const myApiRequest = async (text: string): Promise<FixMistakeResultData> => {
+const myApiRequest = async (
+  apiKey: string,
+  text: string,
+): Promise<FixMistakeResultData> => {
   const input = [...text.split("\n")];
 
   return fetch("https://openairequest-gw5lxik4dq-uc.a.run.app", {
@@ -30,7 +33,7 @@ const myApiRequest = async (text: string): Promise<FixMistakeResultData> => {
     cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer -qKivjCv6MfQSmgF438PjEY7RnLfqoVe",
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
@@ -58,7 +61,10 @@ const myApiRequest = async (text: string): Promise<FixMistakeResultData> => {
     });
 };
 
-export const createMakeRequest = (options: GrammarSuggestPluginOptions) =>
+export const createMakeRequest = (
+  options: GrammarSuggestPluginOptions,
+  apiKey: string,
+) =>
   debounce((view: EditorView) => {
     // The document changed, start API request
     const versionAtRequestStart = docToTextWithMapping(view.state.doc);
@@ -68,7 +74,7 @@ export const createMakeRequest = (options: GrammarSuggestPluginOptions) =>
       oldText,
       versionAtRequestStart.text,
     );
-    myApiRequest(changedRegion.newText)
+    myApiRequest(apiKey, changedRegion.newText)
       .then((fix) => {
         // Check if the document version has changed while we were waiting
         if (

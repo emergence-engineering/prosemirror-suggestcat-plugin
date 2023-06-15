@@ -20,8 +20,10 @@ import {
 import { defaultOptions } from "./defaults";
 
 export const grammarSuggestPlugin = (
+  apiKey: string,
   options: GrammarSuggestPluginOptions = defaultOptions,
 ) => {
+  console.log({ apiKey, ...options });
   let init = false;
   return new Plugin<GrammarSuggestPluginState>({
     key: grammarSuggestPluginKey,
@@ -71,7 +73,7 @@ export const grammarSuggestPlugin = (
       },
     },
     view() {
-      const makeRequest = createMakeRequest(options);
+      const makeRequest = createMakeRequest(options, apiKey);
       return {
         update(view, prevState) {
           const pluginState = grammarSuggestPluginKey.getState(view.state);

@@ -22,7 +22,6 @@ export type GrammarSuggestPluginState = {
   currentSuggestionId?: object;
 };
 export type GrammarSuggestPluginOptions = {
-  apiKey: string;
   debounceMs: number;
   createUpdatePopup: (
     view: EditorView,
