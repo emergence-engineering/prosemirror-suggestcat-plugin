@@ -1,6 +1,6 @@
 {
   "name": "prosemirror-suggestcat-plugin",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags",
     "lint": "tsc --noEmit && eslint src --ext .ts",
-    "test": "jest --watch",
+    "test": "jest",
     "upgrade-interactive": "npm-check --update",
     "publish:np": "np"
   },

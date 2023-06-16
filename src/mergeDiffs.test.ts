@@ -79,7 +79,7 @@ describe("convertDiffToReplaceSet", () => {
 
 describe("mergeReplacePair", () => {
   it("throws error when items are not adjacent", () => {
-    expect(
+    expect(() =>
       mergeReplacePair(
         { from: 0, to: 1, original: "", replacement: "" },
         { from: 4, to: 5, original: "", replacement: "" },

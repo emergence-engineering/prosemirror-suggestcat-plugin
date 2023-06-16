@@ -6,33 +6,32 @@
 
 ## Features
 
-- easy to use
-- we provide you styles, but you can also override them
-- fully customizable popup
+- Adds AI features to your ProseMirror editor
+- Coming soon: text completion, rewriting with a given style, YJS support and more!
 
 ## How to use?
 
-- create your API_KEY on [SuggestCar website](https://www.suggestcat.com/)
-- add `grammarSuggestPlugin`
-- add your api key
-- and `defaultOptions` which you can override
+- Create your API_KEY on [SuggestCat](https://www.suggestcat.com/)
+- Add `grammarSuggestPlugin`
+- Add your api key
+- And `defaultOptions` which you can override
 
 ```typescript
 import {
-  grammarSuggestPlugin,
-  defaultOptions,
+    grammarSuggestPlugin,
+    defaultOptions,
 } from "prosemirror-suggestcat-plugin";
 
 const view = new EditorView(document.querySelector("#editor"), {
-  state: EditorState.create({
-    doc: schema.nodeFromJSON(initialDoc),
-    plugins: [
-      ...exampleSetup({ schema }),
-      grammarSuggestPlugin(PROSEMIRROR_SUGGESTCAT_PLUGIN_API_KEY, {
-        ...defaultOptions,
-      }),
-    ],
-  }),
+    state: EditorState.create({
+        doc: schema.nodeFromJSON(initialDoc),
+        plugins: [
+            ...exampleSetup({schema}),
+            grammarSuggestPlugin(PROSEMIRROR_SUGGESTCAT_PLUGIN_API_KEY, {
+                ...defaultOptions,
+            }),
+        ],
+    }),
 });
 ```
 
@@ -42,14 +41,14 @@ const view = new EditorView(document.querySelector("#editor"), {
 
 ```typescript
 export type GrammarSuggestPluginOptions = {
-  debounceMs: number;
-  createUpdatePopup: (
-    view: EditorView,
-    decoration: Decoration,
-    pos: number,
-    applySuggestion: (view: EditorView, decoration: Decoration) => void,
-    discardSuggestion: (view: EditorView, decoration: Decoration) => void,
-  ) => HTMLElement;
+    debounceMs: number;
+    createUpdatePopup: (
+        view: EditorView,
+        decoration: Decoration,
+        pos: number,
+        applySuggestion: (view: EditorView, decoration: Decoration) => void,
+        discardSuggestion: (view: EditorView, decoration: Decoration) => void,
+    ) => HTMLElement;
 };
 ```
 
@@ -57,24 +56,41 @@ export type GrammarSuggestPluginOptions = {
 
 ```typescript
 export const defaultOptions: GrammarSuggestPluginOptions = {
-  debounceMs: 2000,
-  createUpdatePopup,
+    debounceMs: 2000,
+    createUpdatePopup,
 };
 ```
 
 ### Styles
 
-- add our css for the popup, or you can create your own using `createUpdatePopup` option
+- Add our css for the popup, or you can create your own using `createUpdatePopup` option
 
 ```typescript
 import "prosemirror-suggestcat-plugin/dist/styles/styles.css";
 ```
 
-- our popup structure:
+- Our popup structure:
 
 ```html
+
 <div classname="grammar-suggest-tooltip ProseMirror-widget">
-  <div classname="grammar-suggest-tooltip-apply">suggestion</div
-  <div classname="grammar-suggest-tooltip-discard"><svg /></div
+    <div classname="grammar-suggest-tooltip-apply">
+        suggestion
+    </div
+    <div classname="grammar-suggest-tooltip-discard">
+        <svg/>
+    </div
 </div
+```
+
+- Style the editor decorations with the follwing classnames
+
+```css
+.grammarSuggestion {
+    background-color: green;
+}
+
+.grammarSuggestion .removalSuggestion {
+    background-color: red;
+}
 ```
