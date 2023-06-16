@@ -11,7 +11,7 @@ export const docToTextWithMapping = (
   doc.descendants((node, pos) => {
     if (node.isText) {
       mapping.push({ docPos: pos, textPos: text.length });
-      text += node.text + "\n";
+      text += `${node.text}\n`;
     }
   });
   return { text, mapping: mapping.length ? mapping : defaultMapping };

@@ -12,7 +12,7 @@ export const getTextWithNewlines = (node: Node) => {
   let text = "";
   node.descendants((n, pos) => {
     if (n.isText) {
-      text += n.text + "\n";
+      text += `${n.text}\n`;
     }
   });
   return text;

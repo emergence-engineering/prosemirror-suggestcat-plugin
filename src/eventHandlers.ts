@@ -30,7 +30,7 @@ export const handleUpdate = (
   const { changedRegion, fix, mapping, text } = meta;
   const newDecorations = getDiff(changedRegion.newText, fix.result)
     .filter((i) => !isIdentity(i))
-    .filter((i) => i.original !== i.replacement + "\n")
+    .filter((i) => i.original !== `${i.replacement}\n`)
     .map(({ from, to, original, replacement }) => {
       const decorationFrom = textPosToDocPos(
         changedRegion.start + from,
@@ -52,8 +52,9 @@ export const handleUpdate = (
         decorationFrom,
         decorationTo,
         {
-          class:
-            "grammarSuggestion" + (original === "" ? "removalSuggestion" : ""),
+          class: `grammarSuggestion${
+            original === "" ? "removalSuggestion" : ""
+          }`,
         },
         spec,
       );
@@ -136,7 +137,7 @@ const applySuggestion = (view: EditorView, decoration: Decoration) => {
 };
 
 const discardSuggestion = (view: EditorView, decoration: Decoration) => {
-  const spec: GrammarSuggestDecorationSpec = decoration.spec;
+  const { spec } = decoration;
   const meta: DiscardSuggestionMeta = {
     type: GrammarSuggestMetaType.discardSuggestion,
     id: spec.id,

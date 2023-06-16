@@ -21,6 +21,6 @@ describe("mapping utils", () => {
     const textPosition = textPosToDocPos(idx, mapping);
     const newDoc = state.tr.insertText("a", textPosition).doc;
     const newText = docToTextWithMapping(newDoc).text;
-    expect(newText).toEqual(text.slice(0, idx) + "a" + text.slice(idx));
+    expect(newText).toEqual(`${text.slice(0, idx)}a${text.slice(idx)}`);
   });
 });

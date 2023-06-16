@@ -14,12 +14,12 @@ export const createUpdatePopup = (
 ) => {
   const root = document.createElement("div");
   root.className = "grammar-suggest-tooltip";
-  const spec: GrammarSuggestDecorationSpec = decoration.spec;
+  const { spec } = decoration;
   const boundingRect = view.dom.getBoundingClientRect();
   root.id = GrammarSuggestElementClass.grammarSuggestPopup;
   const coords = view.coordsAtPos(pos);
-  root.style.left = coords.left - boundingRect.left + "px";
-  root.style.top = coords.bottom - boundingRect.top + 5 + "px";
+  root.style.left = `${coords.left - boundingRect.left}px`;
+  root.style.top = `${coords.bottom - boundingRect.top + 5}px`;
 
   const applyButton = document.createElement("div");
   applyButton.className = "grammar-suggest-tooltip-apply";
