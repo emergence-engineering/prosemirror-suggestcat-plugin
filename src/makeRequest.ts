@@ -58,6 +58,14 @@ const myApiRequest = async (
           .join("\n"),
         fixed: true,
       } as FixMistakeResultData;
+    })
+    .catch((e) => {
+      console.error(e.message);
+
+      return {
+        fixed: false,
+        result: text,
+      };
     });
 };
 
