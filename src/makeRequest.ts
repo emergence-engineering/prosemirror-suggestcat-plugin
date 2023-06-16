@@ -43,7 +43,10 @@ const myApiRequest = async (
     }),
   })
     .then((response) => {
-      return response.json();
+      if (response.ok) {
+        return response.json();
+      }
+      return Promise.reject(response);
     })
     .then((jsonData) => {
       if (!jsonData || !jsonData.some((i: string) => isJsonString(i))) {
@@ -60,7 +63,9 @@ const myApiRequest = async (
       } as FixMistakeResultData;
     })
     .catch((e) => {
-      console.error(e.message);
+      e.text().then((text: string) => {
+        console.error({ status: e.status, text });
+      });
 
       return {
         fixed: false,

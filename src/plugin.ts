@@ -23,7 +23,6 @@ export const grammarSuggestPlugin = (
   apiKey: string,
   options: GrammarSuggestPluginOptions = defaultOptions,
 ) => {
-  console.log({ apiKey, ...options });
   let init = false;
   return new Plugin<GrammarSuggestPluginState>({
     key: grammarSuggestPluginKey,
