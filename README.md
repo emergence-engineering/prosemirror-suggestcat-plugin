@@ -6,6 +6,8 @@
 
 ## Features
 
+![feature-gif](https://suggestcat.com/suggestcat.gif)
+
 - Adds AI features to your ProseMirror editor
 - Coming soon: text completion, rewriting with a given style, YJS support and more!
 
