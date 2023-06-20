@@ -28,7 +28,7 @@ const myApiRequest = async (
 ): Promise<FixMistakeResultData> => {
   const input = [...text.split("\n")];
 
-  return fetch("https://openairequest-gw5lxik4dq-uc.a.run.app", {
+  return fetch("https://prosemirror-ai-plugin.web.app/api/suggestion", {
     method: "POST",
     cache: "no-cache",
     headers: {
