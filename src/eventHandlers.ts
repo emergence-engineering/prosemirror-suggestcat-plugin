@@ -48,12 +48,13 @@ export const handleUpdate = (
         originalText: original,
         id: {},
       };
+
       return Decoration.inline(
         decorationFrom,
         decorationTo,
         {
-          class: `grammarSuggestion${
-            original === "" ? "removalSuggestion" : ""
+          class: `grammarSuggestion ${
+            replacement === "" ? "removalSuggestion" : ""
           }`,
         },
         spec,

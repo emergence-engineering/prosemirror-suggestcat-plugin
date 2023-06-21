@@ -1,9 +1,6 @@
 import { Decoration, EditorView } from "prosemirror-view";
 
-import {
-  GrammarSuggestDecorationSpec,
-  GrammarSuggestElementClass,
-} from "./types";
+import { GrammarSuggestElementClass } from "./types";
 
 export const createUpdatePopup = (
   view: EditorView,
@@ -23,7 +20,11 @@ export const createUpdatePopup = (
 
   const applyButton = document.createElement("div");
   applyButton.className = "grammar-suggest-tooltip-apply";
-  applyButton.innerText = spec.text;
+  applyButton.innerText = spec.text || spec.originalText;
+  if (!spec.text) {
+    applyButton.style.textDecoration = "line-through";
+    applyButton.style.color = "red";
+  }
   applyButton.onclick = () => {
     applySuggestion(view, decoration);
   };
