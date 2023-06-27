@@ -21,10 +21,10 @@ import {
 import { getDiff, isIdentity } from "./mergeDiffs";
 import { docToTextWithMapping, textPosToDocPos } from "./mapping";
 
+// add new decoration with suggestion coming from openAI
 export const handleUpdate = (
   pluginState: GrammarSuggestPluginState,
   meta: UpdateSuggestionMeta,
-  tr: Transaction,
 ): GrammarSuggestPluginState => {
   // Add decorations
   const { changedRegion, fix, mapping, text } = meta;
@@ -47,43 +47,22 @@ export const handleUpdate = (
         text: decorationText,
         originalText: original,
         id: {},
+        class: `grammarSuggestion ${
+          replacement === "" ? "removalSuggestion" : ""
+        }`,
       };
 
-      return Decoration.inline(
-        decorationFrom,
-        decorationTo,
-        {
-          class: `grammarSuggestion ${
-            replacement === "" ? "removalSuggestion" : ""
-          }`,
-        },
+      return {
+        from: decorationFrom,
+        to: decorationTo,
         spec,
-      );
+      };
     });
-  return {
-    ...pluginState,
-    decorations: pluginState.decorations.add(tr.doc, newDecorations),
-    lastText: text,
-  };
-};
 
-export const handleAccept = (
-  pluginState: GrammarSuggestPluginState,
-  meta: AcceptSuggestionMeta,
-  tr: Transaction,
-): GrammarSuggestPluginState => {
-  const newDecorations = pluginState.decorations.remove(
-    pluginState.decorations.find(
-      0,
-      tr.doc.nodeSize,
-      (spec: GrammarSuggestDecorationSpec) => spec.id === meta.id,
-    ),
-  );
   return {
     ...pluginState,
-    lastText: getTextWithNewlines(tr.doc),
-    decorations: newDecorations.map(tr.mapping, tr.doc),
-    popupDecoration: DecorationSet.empty,
+    decorations: [...pluginState.decorations, ...newDecorations],
+    lastText: text,
   };
 };
 
@@ -98,7 +77,11 @@ export const handleDocChange = (
   if (text === oldText) return pluginState;
 
   const changedRegion = getChangedRegions(oldText, text);
-  const mappedDecorations = pluginState.decorations.map(tr.mapping, tr.doc);
+  const mappedDecorations = pluginState.decorations.map((deco) => ({
+    ...deco,
+    from: tr.mapping.map(deco.from),
+    to: tr.mapping.map(deco.to),
+  }));
   const decorationsStart = textPosToDocPos(changedRegion.start, mapping);
   const decorationsEnd = textPosToDocPos(changedRegion.end, mapping);
   const mappedPopupDecoration = pluginState.popupDecoration.map(
@@ -107,8 +90,8 @@ export const handleDocChange = (
   );
   return {
     ...pluginState,
-    decorations: mappedDecorations.remove(
-      mappedDecorations.find(decorationsStart, decorationsEnd),
+    decorations: mappedDecorations.filter(
+      (deco) => !(deco.from >= decorationsStart && deco.to <= decorationsEnd),
     ),
     popupDecoration: mappedPopupDecoration.remove(
       mappedPopupDecoration.find(decorationsStart, decorationsEnd),
@@ -116,14 +99,34 @@ export const handleDocChange = (
   };
 };
 
+// after applying the suggestion, removes the decoration
+export const handleAccept = (
+  pluginState: GrammarSuggestPluginState,
+  meta: AcceptSuggestionMeta,
+  tr: Transaction,
+): GrammarSuggestPluginState => {
+  return {
+    ...pluginState,
+    lastText: getTextWithNewlines(tr.doc),
+    decorations: pluginState.decorations
+      .filter((deco) => deco.spec.id !== meta.id)
+      .map((deco) => ({
+        ...deco,
+        from: tr.mapping.map(deco.from),
+        to: tr.mapping.map(deco.to),
+      })),
+    popupDecoration: DecorationSet.empty,
+  };
+};
+
+// callback for popup decoration
+// inserts the suggestion to the doc replacing the original text
 const applySuggestion = (view: EditorView, decoration: Decoration) => {
-  const currentDecoration = grammarSuggestPluginKey
-    .getState(view.state)
-    ?.decorations.find(
-      0,
-      view.state.doc.nodeSize,
-      (spec: GrammarSuggestDecorationSpec) => spec.id === decoration.spec.id,
-    )[0] as Decoration | undefined;
+  const pluginState = grammarSuggestPluginKey.getState(view.state);
+  const currentDecoration = pluginState?.decorations.filter(
+    (deco) => deco.spec.id === decoration.spec.id,
+  )[0];
+
   if (!currentDecoration) return;
   const { text } = currentDecoration.spec as GrammarSuggestDecorationSpec;
   const { from, to } = currentDecoration;
@@ -137,6 +140,7 @@ const applySuggestion = (view: EditorView, decoration: Decoration) => {
   view.dispatch(tr);
 };
 
+// callback for popup decoration
 const discardSuggestion = (view: EditorView, decoration: Decoration) => {
   const { spec } = decoration;
   const meta: DiscardSuggestionMeta = {
@@ -147,6 +151,7 @@ const discardSuggestion = (view: EditorView, decoration: Decoration) => {
   view.dispatch(tr);
 };
 
+// creates a popup decoration for the suggestion
 export const handleOpenSuggestion = (
   pluginState: GrammarSuggestPluginState,
   meta: OpenSuggestionMeta,
@@ -177,11 +182,16 @@ export const handleOpenSuggestion = (
   };
 };
 
+// plugin's handleClick prop
 export const handleClick = (view: EditorView, pos: number) => {
   const pluginState = grammarSuggestPluginKey.getState(view.state);
   if (!pluginState) return false;
   const { decorations } = pluginState;
-  const decoration = decorations.find(pos, pos)[0] as Decoration | undefined;
+
+  const decoration = decorations.filter(
+    (deco) => deco.from <= pos && deco.to >= pos,
+  )[0];
+
   if (!decoration) {
     const meta: CloseSuggestionMeta = {
       type: GrammarSuggestMetaType.closeSuggestion,
@@ -196,11 +206,13 @@ export const handleClick = (view: EditorView, pos: number) => {
   const meta: OpenSuggestionMeta = {
     type: GrammarSuggestMetaType.openSuggestion,
     decoration,
+    id: decoration.spec.id,
   };
   view.dispatch(view.state.tr.setMeta(grammarSuggestPluginKey, meta));
   return false;
 };
 
+// removes discarded decoration from the state
 export const handleDiscardSuggestion = (
   pluginState: GrammarSuggestPluginState,
   meta: DiscardSuggestionMeta,
@@ -208,13 +220,9 @@ export const handleDiscardSuggestion = (
 ): GrammarSuggestPluginState => {
   return {
     ...pluginState,
-    decorations: pluginState.decorations.remove(
-      pluginState.decorations.find(
-        0,
-        tr.doc.nodeSize,
-        (spec: GrammarSuggestDecorationSpec) => spec.id === meta.id,
-      ),
-    ),
+    decorations: pluginState.decorations.filter(
+      (deco) => deco.spec.id !== meta.id,
+    ), // .map(tr.mapping, tr.doc),
     popupDecoration: DecorationSet.empty,
   };
 };

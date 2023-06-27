@@ -1,5 +1,5 @@
 import { Plugin, PluginKey } from "prosemirror-state";
-import { DecorationSet } from "prosemirror-view";
+import { Decoration, DecorationSet } from "prosemirror-view";
 import { getTextWithNewlines, grammarSuggestPluginKey } from "./utils";
 import {
   GrammarPluginMeta,
@@ -30,7 +30,7 @@ export const grammarSuggestPlugin = (
       init() {
         return {
           lastText: "",
-          decorations: DecorationSet.empty,
+          decorations: [],
           popupDecoration: DecorationSet.empty,
         };
       },
@@ -39,7 +39,7 @@ export const grammarSuggestPlugin = (
           grammarSuggestPluginKey,
         );
         if (meta?.type === GrammarSuggestMetaType.suggestionUpdate) {
-          return handleUpdate(pluginState, meta, tr);
+          return handleUpdate(pluginState, meta);
         }
         if (meta?.type === GrammarSuggestMetaType.acceptSuggestion) {
           return handleAccept(pluginState, meta, tr);
@@ -65,10 +65,15 @@ export const grammarSuggestPlugin = (
       decorations: (state) => {
         const pluginState = grammarSuggestPluginKey.getState(state);
         if (!pluginState) return null;
-        return pluginState.decorations.add(
-          state.doc,
-          pluginState.popupDecoration.find(),
-        );
+
+        const stateDecos = pluginState.decorations;
+
+        const decos = stateDecos.map(({ from, to, spec }) => {
+          return Decoration.inline(from, to, { class: spec.class }, spec);
+        });
+
+        const decorationSet = DecorationSet.create(state.doc, decos);
+        return decorationSet.add(state.doc, pluginState.popupDecoration.find());
       },
     },
     view() {

@@ -14,13 +14,27 @@ export interface ChangedRegion {
   newText: string;
 }
 
+export type GrammarSuggestDecorationSpec = {
+  originalText: string;
+  text: string;
+  id: object; // TODO: Maybe not needed?
+  class: string;
+};
+
+export type DecorationObject = {
+  from: number;
+  to: number;
+  spec: GrammarSuggestDecorationSpec;
+};
+
 export type GrammarSuggestPluginState = {
   lastText?: string;
   timer?: number;
-  decorations: DecorationSet;
+  decorations: Array<DecorationObject>;
   popupDecoration: DecorationSet;
   currentSuggestionId?: object;
 };
+
 export type GrammarSuggestPluginOptions = {
   debounceMs: number;
   createUpdatePopup: (
@@ -66,7 +80,8 @@ export interface UpdateSuggestionMeta {
 
 export interface OpenSuggestionMeta {
   type: GrammarSuggestMetaType.openSuggestion;
-  decoration: Decoration;
+  decoration: DecorationObject;
+  id: object;
 }
 
 export interface DiscardSuggestionMeta {
@@ -84,12 +99,6 @@ export type GrammarPluginMeta =
   | OpenSuggestionMeta
   | CloseSuggestionMeta
   | DiscardSuggestionMeta;
-
-export type GrammarSuggestDecorationSpec = {
-  originalText: string;
-  text: string;
-  id: object; // TODO: Maybe not needed?
-};
 
 export type PopupDecorationSpec = {
   id: object; // The same id as the suggestion
