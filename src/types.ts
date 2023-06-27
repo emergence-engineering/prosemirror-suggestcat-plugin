@@ -44,6 +44,7 @@ export type GrammarSuggestPluginOptions = {
     applySuggestion: (view: EditorView, decoration: Decoration) => void,
     discardSuggestion: (view: EditorView, decoration: Decoration) => void,
   ) => HTMLElement;
+  withYjs: boolean;
 };
 
 export enum GrammarSuggestMetaType {

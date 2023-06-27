@@ -20,14 +20,18 @@ import {
 } from "./utils";
 import { getDiff, isIdentity } from "./mergeDiffs";
 import { docToTextWithMapping, textPosToDocPos } from "./mapping";
+import { yjsFactory } from "./yjs";
 
 // add new decoration with suggestion coming from openAI
 export const handleUpdate = (
   pluginState: GrammarSuggestPluginState,
   meta: UpdateSuggestionMeta,
+  newState: EditorState,
+  withYjs: boolean,
 ): GrammarSuggestPluginState => {
   // Add decorations
   const { changedRegion, fix, mapping, text } = meta;
+  const factory = yjsFactory(newState);
   const newDecorations = getDiff(changedRegion.newText, fix.result)
     .filter((i) => !isIdentity(i))
     .filter((i) => i.original !== `${i.replacement}\n`)
@@ -52,9 +56,17 @@ export const handleUpdate = (
         }`,
       };
 
+      let fromPos: any = decorationFrom;
+      let toPos: any = decorationTo;
+
+      if (withYjs) {
+        fromPos = factory.getRelativePos(decorationFrom);
+        toPos = factory.getRelativePos(decorationTo);
+      }
+
       return {
-        from: decorationFrom,
-        to: decorationTo,
+        from: fromPos,
+        to: toPos,
         spec,
       };
     });
@@ -70,6 +82,8 @@ export const handleDocChange = (
   pluginState: GrammarSuggestPluginState,
   tr: Transaction,
   oldState: EditorState,
+  newState: EditorState,
+  withYjs: boolean,
 ): GrammarSuggestPluginState => {
   // Do it more efficiently. There's no need to calculate the whole mapping etc.
   const oldText = docToTextWithMapping(oldState.doc).text;
@@ -77,22 +91,44 @@ export const handleDocChange = (
   if (text === oldText) return pluginState;
 
   const changedRegion = getChangedRegions(oldText, text);
-  const mappedDecorations = pluginState.decorations.map((deco) => ({
-    ...deco,
-    from: tr.mapping.map(deco.from),
-    to: tr.mapping.map(deco.to),
-  }));
+
   const decorationsStart = textPosToDocPos(changedRegion.start, mapping);
   const decorationsEnd = textPosToDocPos(changedRegion.end, mapping);
   const mappedPopupDecoration = pluginState.popupDecoration.map(
     tr.mapping,
     tr.doc,
   );
+
+  let mappedDecorations: Decoration[] = [];
+  let decorations: Decoration[] = [];
+
+  if (withYjs) {
+    const factory = yjsFactory(newState);
+    mappedDecorations = pluginState.decorations.map(
+      factory.getDecoAbsolutePosition,
+    );
+
+    decorations = mappedDecorations
+      .filter(
+        (deco) =>
+          !(deco?.from >= decorationsStart && deco.to <= decorationsEnd),
+      )
+      .map(factory.getDecoRelativePosition);
+  } else {
+    mappedDecorations = pluginState.decorations.map((deco) => ({
+      ...deco,
+      from: tr.mapping.map(deco.from),
+      to: tr.mapping.map(deco.to),
+    }));
+
+    decorations = mappedDecorations.filter(
+      (deco) => !(deco.from >= decorationsStart && deco.to <= decorationsEnd),
+    );
+  }
+
   return {
     ...pluginState,
-    decorations: mappedDecorations.filter(
-      (deco) => !(deco.from >= decorationsStart && deco.to <= decorationsEnd),
-    ),
+    decorations,
     popupDecoration: mappedPopupDecoration.remove(
       mappedPopupDecoration.find(decorationsStart, decorationsEnd),
     ),

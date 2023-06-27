@@ -1,5 +1,6 @@
-import { Plugin, PluginKey } from "prosemirror-state";
+import { Plugin } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
+
 import { getTextWithNewlines, grammarSuggestPluginKey } from "./utils";
 import {
   GrammarPluginMeta,
@@ -16,8 +17,8 @@ import {
   handleOpenSuggestion,
   handleUpdate,
 } from "./eventHandlers";
-
 import { defaultOptions } from "./defaults";
+import { yjsFactory } from "./yjs";
 
 export const grammarSuggestPlugin = (
   apiKey: string,
@@ -39,7 +40,7 @@ export const grammarSuggestPlugin = (
           grammarSuggestPluginKey,
         );
         if (meta?.type === GrammarSuggestMetaType.suggestionUpdate) {
-          return handleUpdate(pluginState, meta);
+          return handleUpdate(pluginState, meta, newState, options.withYjs);
         }
         if (meta?.type === GrammarSuggestMetaType.acceptSuggestion) {
           return handleAccept(pluginState, meta, tr);
@@ -55,7 +56,13 @@ export const grammarSuggestPlugin = (
         }
         // return the new plugin state after a transaction
         if (tr.docChanged) {
-          return handleDocChange(pluginState, tr, oldState);
+          return handleDocChange(
+            pluginState,
+            tr,
+            oldState,
+            newState,
+            options.withYjs,
+          );
         }
         return pluginState;
       },
@@ -66,11 +73,18 @@ export const grammarSuggestPlugin = (
         const pluginState = grammarSuggestPluginKey.getState(state);
         if (!pluginState) return null;
 
-        const stateDecos = pluginState.decorations;
+        let decos: Decoration[] = [];
 
-        const decos = stateDecos.map(({ from, to, spec }) => {
-          return Decoration.inline(from, to, { class: spec.class }, spec);
-        });
+        if (options.withYjs) {
+          const factory = yjsFactory(state);
+          decos = pluginState.decorations
+            .map(factory.createInlineDecoFromRelativePos)
+            .filter(Boolean) as Decoration[];
+        } else {
+          decos = pluginState.decorations.map(({ from, to, spec }) => {
+            return Decoration.inline(from, to, { class: spec.class }, spec);
+          });
+        }
 
         const decorationSet = DecorationSet.create(state.doc, decos);
         return decorationSet.add(state.doc, pluginState.popupDecoration.find());
