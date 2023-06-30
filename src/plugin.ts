@@ -55,7 +55,7 @@ export const grammarSuggestPlugin = (
         }
         // return the new plugin state after a transaction
         if (tr.docChanged) {
-          return handleDocChange(pluginState, tr, oldState);
+          return handleDocChange(pluginState, tr, oldState, options.withYjs);
         }
         return pluginState;
       },

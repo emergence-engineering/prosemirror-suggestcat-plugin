@@ -1,5 +1,6 @@
 import { Decoration, DecorationSet, EditorView } from "prosemirror-view";
 import { EditorState, Transaction } from "prosemirror-state";
+import { Mapping, StepMap } from "prosemirror-transform";
 
 import {
   AcceptSuggestionMeta,
@@ -91,20 +92,31 @@ export const handleDocChange = (
   pluginState: GrammarSuggestPluginState,
   tr: Transaction,
   oldState: EditorState,
+  withYjs: boolean,
 ): GrammarSuggestPluginState => {
   // Do it more efficiently. There's no need to calculate the whole mapping etc.
   const oldText = docToTextWithMapping(oldState.doc).text;
   const { text, mapping } = docToTextWithMapping(tr.doc);
   if (text === oldText) return pluginState;
 
+  const diffStart = tr.doc.content.findDiffStart(oldState.doc.content);
+  const diffEnd = oldState.doc.content.findDiffEnd(tr.doc.content);
+  const map =
+    diffEnd && diffStart
+      ? new StepMap([diffStart, diffEnd.a - diffStart, diffEnd.b - diffStart])
+      : new StepMap([0, 0, 0]);
+
+  const pmMapping = withYjs ? new Mapping([map]) : tr.mapping;
+
   const changedRegion = getChangedRegions(oldText, text);
-  const mappedDecorations = pluginState.decorations.map(tr.mapping, tr.doc);
+  const mappedDecorations = pluginState.decorations.map(pmMapping, tr.doc);
   const decorationsStart = textPosToDocPos(changedRegion.start, mapping);
   const decorationsEnd = textPosToDocPos(changedRegion.end, mapping);
   const mappedPopupDecoration = pluginState.popupDecoration.map(
-    tr.mapping,
+    pmMapping,
     tr.doc,
   );
+
   return {
     ...pluginState,
     decorations: mappedDecorations.remove(
