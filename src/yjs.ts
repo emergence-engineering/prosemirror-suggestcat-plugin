@@ -55,6 +55,15 @@ export const yjsFactory = (state: EditorState) => {
     );
   };
 
+  const getAbsolutePos = (pos: any): number | null => {
+    return relativePositionToAbsolutePosition(
+      YState.doc,
+      YState.type,
+      pos,
+      YState.binding.mapping,
+    );
+  };
+
   const createInlineDecoFromRelativePos = (deco: DecorationObject) => {
     const posFrom = relativePositionToAbsolutePosition(
       YState.doc,
@@ -80,5 +89,6 @@ export const yjsFactory = (state: EditorState) => {
     getDecoRelativePosition,
     getRelativePos,
     createInlineDecoFromRelativePos,
+    getAbsolutePos,
   };
 };

@@ -1,5 +1,6 @@
+import * as Y from "yjs";
 import { Plugin } from "prosemirror-state";
-import { Decoration, DecorationSet } from "prosemirror-view";
+import { Decoration, DecorationSet, EditorView } from "prosemirror-view";
 
 import { getTextWithNewlines, grammarSuggestPluginKey } from "./utils";
 import {
@@ -22,9 +23,11 @@ import { yjsFactory } from "./yjs";
 
 export const grammarSuggestPlugin = (
   apiKey: string,
+  fragment?: Y.XmlFragment,
   options: GrammarSuggestPluginOptions = defaultOptions,
 ) => {
   let init = false;
+  let yjsInit = false;
   return new Plugin<GrammarSuggestPluginState>({
     key: grammarSuggestPluginKey,
     state: {
@@ -33,17 +36,22 @@ export const grammarSuggestPlugin = (
           lastText: "",
           decorations: [],
           popupDecoration: DecorationSet.empty,
+          syncHack: {},
         };
       },
-      apply(tr, pluginState, oldState, newState) {
+      apply(tr, state, oldState, newState) {
         const meta: GrammarPluginMeta | undefined = tr.getMeta(
           grammarSuggestPluginKey,
         );
+        const pluginState = {
+          ...state,
+          syncHack: meta?.syncHack || state.syncHack,
+        };
         if (meta?.type === GrammarSuggestMetaType.suggestionUpdate) {
           return handleUpdate(pluginState, meta, newState, options.withYjs);
         }
         if (meta?.type === GrammarSuggestMetaType.acceptSuggestion) {
-          return handleAccept(pluginState, meta, tr);
+          return handleAccept(pluginState, meta, tr, newState, options.withYjs);
         }
         if (meta?.type === GrammarSuggestMetaType.openSuggestion) {
           return handleOpenSuggestion(pluginState, meta, tr, options);
@@ -68,7 +76,8 @@ export const grammarSuggestPlugin = (
       },
     },
     props: {
-      handleClick,
+      handleClick: (view: EditorView, pos: number) =>
+        handleClick(view, pos, options.withYjs),
       decorations: (state) => {
         const pluginState = grammarSuggestPluginKey.getState(state);
         if (!pluginState) return null;
@@ -94,6 +103,22 @@ export const grammarSuggestPlugin = (
       const makeRequest = createMakeRequest(options, apiKey);
       return {
         update(view, prevState) {
+          if (!yjsInit && fragment && options.withYjs) {
+            yjsInit = true;
+            fragment.observeDeep((events) => {
+              if (
+                JSON.stringify(view.state.doc.toJSON()) !==
+                JSON.stringify(prevState.doc.toJSON())
+              ) {
+                view.dispatch(
+                  view.state.tr.setMeta(grammarSuggestPluginKey, {
+                    syncHack: {},
+                  }),
+                );
+              }
+            });
+          }
+
           const pluginState = grammarSuggestPluginKey.getState(view.state);
           // When editor state changes, check if the version changed
           if (

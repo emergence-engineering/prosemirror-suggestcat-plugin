@@ -140,41 +140,73 @@ export const handleAccept = (
   pluginState: GrammarSuggestPluginState,
   meta: AcceptSuggestionMeta,
   tr: Transaction,
+  state: EditorState,
+  withYjs: boolean,
 ): GrammarSuggestPluginState => {
-  return {
-    ...pluginState,
-    lastText: getTextWithNewlines(tr.doc),
-    decorations: pluginState.decorations
-      .filter((deco) => deco.spec.id !== meta.id)
+  const factory = yjsFactory(state);
+
+  const filtered = pluginState.decorations.filter(
+    (deco) => deco.spec.id !== meta.id,
+  );
+
+  let decorations: Decoration[] = [];
+  if (withYjs) {
+    decorations = filtered
+      .map(factory.getDecoAbsolutePosition)
       .map((deco) => ({
         ...deco,
         from: tr.mapping.map(deco.from),
         to: tr.mapping.map(deco.to),
-      })),
+      }))
+      .map(factory.getDecoRelativePosition);
+  } else {
+    decorations = filtered.map((deco) => ({
+      ...deco,
+      from: tr.mapping.map(deco.from),
+      to: tr.mapping.map(deco.to),
+    }));
+  }
+
+  return {
+    ...pluginState,
+    lastText: getTextWithNewlines(tr.doc),
+    decorations,
     popupDecoration: DecorationSet.empty,
   };
 };
 
 // callback for popup decoration
 // inserts the suggestion to the doc replacing the original text
-const applySuggestion = (view: EditorView, decoration: Decoration) => {
-  const pluginState = grammarSuggestPluginKey.getState(view.state);
-  const currentDecoration = pluginState?.decorations.filter(
-    (deco) => deco.spec.id === decoration.spec.id,
-  )[0];
+const applySuggestion =
+  (withYjs: boolean) => (view: EditorView, decoration: Decoration) => {
+    const pluginState = grammarSuggestPluginKey.getState(view.state);
+    const currentDecoration = pluginState?.decorations.filter(
+      (deco) => deco.spec.id === decoration.spec.id,
+    )[0];
 
-  if (!currentDecoration) return;
-  const { text } = currentDecoration.spec as GrammarSuggestDecorationSpec;
-  const { from, to } = currentDecoration;
-  const meta: AcceptSuggestionMeta = {
-    type: GrammarSuggestMetaType.acceptSuggestion,
-    id: decoration.spec.id,
+    if (!currentDecoration) return;
+    const { text } = currentDecoration.spec as GrammarSuggestDecorationSpec;
+    const { from, to } = currentDecoration;
+    const meta: AcceptSuggestionMeta = {
+      type: GrammarSuggestMetaType.acceptSuggestion,
+      id: decoration.spec.id,
+    };
+
+    let fromPos: number | null = from;
+    let toPos: number | null = to;
+
+    if (withYjs) {
+      const factory = yjsFactory(view.state);
+      fromPos = factory.getAbsolutePos(from);
+      toPos = factory.getAbsolutePos(to);
+    }
+    if (!fromPos || !toPos) return;
+
+    const tr = view.state.tr
+      .insertText(text, fromPos, toPos)
+      .setMeta(grammarSuggestPluginKey, meta);
+    view.dispatch(tr);
   };
-  const tr = view.state.tr
-    .insertText(text, from, to)
-    .setMeta(grammarSuggestPluginKey, meta);
-  view.dispatch(tr);
-};
 
 // callback for popup decoration
 const discardSuggestion = (view: EditorView, decoration: Decoration) => {
@@ -208,7 +240,7 @@ export const handleOpenSuggestion = (
             view,
             decoration,
             pos,
-            applySuggestion,
+            applySuggestion(options.withYjs),
             discardSuggestion,
           );
         },
@@ -219,14 +251,26 @@ export const handleOpenSuggestion = (
 };
 
 // plugin's handleClick prop
-export const handleClick = (view: EditorView, pos: number) => {
+export const handleClick = (
+  view: EditorView,
+  pos: number,
+  withYjs: boolean,
+) => {
   const pluginState = grammarSuggestPluginKey.getState(view.state);
   if (!pluginState) return false;
   const { decorations } = pluginState;
 
-  const decoration = decorations.filter(
+  // yjs
+  let decoration: Decoration = decorations.filter(
     (deco) => deco.from <= pos && deco.to >= pos,
   )[0];
+
+  if (withYjs) {
+    const factory = yjsFactory(view.state);
+    decoration = decorations
+      .map(factory.getDecoAbsolutePosition)
+      .filter((deco) => deco.from <= pos && deco.to >= pos)[0];
+  }
 
   if (!decoration) {
     const meta: CloseSuggestionMeta = {

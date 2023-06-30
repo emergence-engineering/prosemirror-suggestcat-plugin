@@ -33,6 +33,7 @@ export type GrammarSuggestPluginState = {
   decorations: Array<DecorationObject>;
   popupDecoration: DecorationSet;
   currentSuggestionId?: object;
+  syncHack: object;
 };
 
 export type GrammarSuggestPluginOptions = {
@@ -95,11 +96,11 @@ export interface CloseSuggestionMeta {
 }
 
 export type GrammarPluginMeta =
-  | UpdateSuggestionMeta
-  | AcceptSuggestionMeta
-  | OpenSuggestionMeta
-  | CloseSuggestionMeta
-  | DiscardSuggestionMeta;
+  | (UpdateSuggestionMeta & { syncHack: object })
+  | (AcceptSuggestionMeta & { syncHack: object })
+  | (OpenSuggestionMeta & { syncHack: object })
+  | (CloseSuggestionMeta & { syncHack: object })
+  | (DiscardSuggestionMeta & { syncHack: object });
 
 export type PopupDecorationSpec = {
   id: object; // The same id as the suggestion
