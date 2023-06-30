@@ -1,5 +1,6 @@
 import { Decoration, DecorationSet, EditorView } from "prosemirror-view";
 import { EditorState, Transaction } from "prosemirror-state";
+import { Mapping, StepMap } from "prosemirror-transform";
 
 import {
   AcceptSuggestionMeta,
@@ -94,10 +95,6 @@ export const handleDocChange = (
 
   const decorationsStart = textPosToDocPos(changedRegion.start, mapping);
   const decorationsEnd = textPosToDocPos(changedRegion.end, mapping);
-  const mappedPopupDecoration = pluginState.popupDecoration.map(
-    tr.mapping,
-    tr.doc,
-  );
 
   let mappedDecorations: Decoration[] = [];
   let decorations: Decoration[] = [];
@@ -125,6 +122,20 @@ export const handleDocChange = (
       (deco) => !(deco.from >= decorationsStart && deco.to <= decorationsEnd),
     );
   }
+
+  const diffstart = tr.doc.content.findDiffStart(oldState.doc.content);
+  const diffEnd = oldState.doc.content.findDiffEnd(tr.doc.content);
+  const map =
+    diffEnd && diffstart
+      ? new StepMap([diffstart, diffEnd.a - diffstart, diffEnd.b - diffstart])
+      : new StepMap([0, 0, 0]);
+
+  const pmMapping = withYjs ? new Mapping([map]) : tr.mapping;
+
+  const mappedPopupDecoration = pluginState.popupDecoration.map(
+    pmMapping,
+    tr.doc,
+  );
 
   return {
     ...pluginState,
