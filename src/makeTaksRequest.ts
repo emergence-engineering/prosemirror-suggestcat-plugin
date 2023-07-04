@@ -4,19 +4,72 @@ import { Node } from "prosemirror-model";
 import { CompletePluginState, Status, TaskType } from "./types";
 import { completePluginKey } from "./utils";
 
-const val = "Hello world";
-let index = 0;
-
-const makeRequest = async (
+const request = async (
   apiKey: string,
   text: string,
-): Promise<{ result: string | null; done: boolean }> => {
-  return new Promise((resolve) => {
-    if (index <= val.length) {
-      return resolve({ result: val[index++], done: false });
-    }
-    return resolve({ result: null, done: true });
-  });
+  pluginState: CompletePluginState,
+  view: EditorView,
+) => {
+  let res = "";
+  try {
+    const response = await fetch(
+      "https://prosemirror-ai-plugin.web.app/api/suggestion",
+      {
+        method: "POST",
+        cache: "no-cache",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer -qKivjCv6MfQSmgF438PjEY7RnLfqoVe",
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+
+          modelParams: {
+            input: [text],
+            task: "Complete",
+            params: {
+              // targetLanguage: "German"
+            },
+          },
+        }),
+      },
+    );
+
+    const reader = response.body?.getReader();
+
+    const processStream: any = async ({ done, value }: any) => {
+      if (done) {
+        return;
+      }
+      const chunk = new TextDecoder().decode(value);
+      try {
+        res += JSON.parse(chunk).completion;
+        view.dispatch(
+          view.state.tr.setMeta(completePluginKey, {
+            type: TaskType.complete,
+            status: Status.streaming,
+            result: res,
+          }),
+        );
+      } catch (error) {
+        console.error("Could not parse stream message", chunk, error);
+      }
+      // Continue processing the stream
+      /* eslint-disable-next-line consistent-return */
+      return reader?.read().then(processStream);
+    };
+
+    await reader?.read().then(processStream);
+    view.dispatch(
+      view.state.tr.setMeta(completePluginKey, {
+        type: TaskType.complete,
+        status: Status.finished,
+        result: res,
+      }),
+    );
+  } catch (error) {
+    console.error("Error:", error);
+  }
 };
 
 export const completeRequest = async (
@@ -40,35 +93,7 @@ export const completeRequest = async (
     text = paragraphNodes.join(" ");
   }
 
-  let streamData: { result: string | null; done: boolean } = {
-    result: null,
-    done: false,
-  };
-  let result = streamData.result;
-  let res = "";
-  while (!streamData.done) {
-    /* eslint-disable no-await-in-loop */
-    streamData = await makeRequest(text, apiKey);
-    console.log({ streamData });
-    result = streamData.result;
-
-    res += result || "";
-    view.dispatch(
-      view.state.tr.setMeta(completePluginKey, {
-        type: TaskType.complete,
-        status: Status.streaming,
-        result: res,
-      }),
-    );
-  }
-
-  view.dispatch(
-    view.state.tr.setMeta(completePluginKey, {
-      type: TaskType.complete,
-      status: Status.finished,
-      result: res,
-    }),
-  );
+  request(apiKey, text, pluginState, view);
 };
 
 export const makeLongerRequest = (
