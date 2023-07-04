@@ -1,4 +1,5 @@
 import { Decoration, DecorationSet, EditorView } from "prosemirror-view";
+import { TextSelection } from "prosemirror-state";
 
 export type TextMappingItem = {
   docPos: number;
@@ -100,9 +101,9 @@ export enum GrammarSuggestElementClass {
 }
 
 export enum TaskType {
-  complete = "complete",
-  makeLonger = "makeLonger",
-  makeShorter = "makeShorter",
+  complete = "Complete",
+  makeLonger = "MakeLonger",
+  makeShorter = "MakeShorter",
 }
 
 export enum Status {
@@ -118,6 +119,7 @@ export interface CompletePluginState {
   type?: TaskType;
   status?: Status;
   result?: string;
+  selection?: TextSelection;
 }
 
 export interface TaskMeta {

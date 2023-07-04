@@ -1,5 +1,5 @@
 import { EditorView } from "prosemirror-view";
-import { EditorState } from "prosemirror-state";
+import { EditorState, TextSelection } from "prosemirror-state";
 import { Node } from "prosemirror-model";
 import { CompletePluginState, Status, TaskType } from "./types";
 import { completePluginKey } from "./utils";
@@ -9,6 +9,8 @@ const request = async (
   text: string,
   pluginState: CompletePluginState,
   view: EditorView,
+  task: TaskType,
+  selection?: TextSelection,
 ) => {
   let res = "";
   try {
@@ -26,7 +28,7 @@ const request = async (
 
           modelParams: {
             input: [text],
-            task: "Complete",
+            task,
             params: {
               // targetLanguage: "German"
             },
@@ -43,12 +45,14 @@ const request = async (
       }
       const chunk = new TextDecoder().decode(value);
       try {
-        res += JSON.parse(chunk).completion;
+        console.log({ chunk });
+        res += JSON.parse(chunk)[Object.keys(JSON.parse(chunk))[0]];
         view.dispatch(
           view.state.tr.setMeta(completePluginKey, {
-            type: TaskType.complete,
+            type: task,
             status: Status.streaming,
             result: res,
+            ...(selection && { selection }),
           }),
         );
       } catch (error) {
@@ -62,9 +66,10 @@ const request = async (
     await reader?.read().then(processStream);
     view.dispatch(
       view.state.tr.setMeta(completePluginKey, {
-        type: TaskType.complete,
+        type: task,
         status: Status.finished,
         result: res,
+        ...(selection && { selection }),
       }),
     );
   } catch (error) {
@@ -93,21 +98,29 @@ export const completeRequest = async (
     text = paragraphNodes.join(" ");
   }
 
-  request(apiKey, text, pluginState, view);
+  request(apiKey, text, pluginState, view, TaskType.complete);
 };
 
-export const makeLongerRequest = (
+export const makeShorterLonger = (
+  task: TaskType,
   pluginState: CompletePluginState,
-  state: EditorState,
+  view: EditorView,
   apiKey: string,
 ) => {
-  // TODO implement
-};
+  console.log("makeShorterLonger", task);
+  const selection = view.state.selection as TextSelection;
 
-export const makeShorterRequest = (
-  pluginState: CompletePluginState,
-  state: EditorState,
-  apiKey: string,
-) => {
-  // TODO implement
+  if (!selection) {
+    console.log("No selection");
+    view.dispatch(
+      view.state.tr.setMeta(completePluginKey, {
+        task,
+        status: Status.done,
+      }),
+    );
+    return;
+  }
+
+  const text = view.state.doc.textBetween(selection.from, selection.to, "\n");
+  request(apiKey, text, pluginState, view, task, selection);
 };

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { Plugin } from "prosemirror-state";
-import { completeRequest } from "./makeTaksRequest";
+import { completeRequest, makeShorterLonger } from "./makeTaksRequest";
 import { CompletePluginState, Status, TaskType } from "./types";
 import { completePluginKey, isCompleteMeta } from "./utils";
 
@@ -59,12 +59,9 @@ export const completePlugin = (apiKey: string) =>
                 console.log("complete");
                 break;
               case TaskType.makeLonger:
-                // makeLongerRequest(pluginState, view, apiKey);
-                console.log("makeLonger");
-                break;
               case TaskType.makeShorter:
-                // makeShorterRequest(pluginState, view, apiKey);
-                console.log("makeShorter");
+                makeShorterLonger(pluginState.type, pluginState, view, apiKey);
+                console.log("makeShorterLonger");
                 break;
               default:
                 break;
@@ -85,10 +82,20 @@ export const completePlugin = (apiKey: string) =>
                 console.log("complete accepted");
                 break;
               case TaskType.makeLonger:
-                console.log("makeLonger accepted");
-                break;
               case TaskType.makeShorter:
-                console.log("makeShorter accepted");
+                if (pluginState.selection) {
+                  tr = tr.replaceWith(
+                    pluginState.selection.from,
+                    pluginState.selection.to,
+                    view.state.schema.text(pluginState.result || ""),
+                  );
+                }
+                tr.setMeta(completePluginKey, {
+                  type: pluginState.type,
+                  status: Status.done,
+                });
+                view.dispatch(tr);
+                console.log("makeShorterLonger accepted");
                 break;
               default:
                 break;
