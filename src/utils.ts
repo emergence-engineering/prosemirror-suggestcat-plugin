@@ -2,7 +2,18 @@ import { PluginKey } from "prosemirror-state";
 import { Node } from "prosemirror-model";
 import diff from "fast-diff";
 
-import { ChangedRegion, GrammarSuggestPluginState } from "./types";
+import {
+  ChangedRegion,
+  GrammarSuggestPluginState,
+  TaskMeta,
+  TaskType,
+} from "./types";
+
+export const completePluginKey = new PluginKey("completePlugin");
+
+export const isCompleteMeta = (meta: any): meta is TaskMeta => {
+  return Object.values(TaskType).includes(meta.type);
+};
 
 export const grammarSuggestPluginKey = new PluginKey<GrammarSuggestPluginState>(
   "grammarSuggestPlugin",

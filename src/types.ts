@@ -98,3 +98,29 @@ export type PopupDecorationSpec = {
 export enum GrammarSuggestElementClass {
   grammarSuggestPopup = "grammar-suggest-popup",
 }
+
+export enum TaskType {
+  complete = "complete",
+  makeLonger = "makeLonger",
+  makeShorter = "makeShorter",
+}
+
+export enum Status {
+  new = "new",
+  streaming = "streaming",
+  finished = "finished",
+  accepted = "accepted",
+  rejected = "rejected",
+  done = "done",
+}
+
+export interface CompletePluginState {
+  type?: TaskType;
+  status?: Status;
+  result?: string;
+}
+
+export interface TaskMeta {
+  type: TaskType;
+  status: Status.new | Status.accepted | Status.rejected;
+}
