@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { Fragment, Slice } from "prosemirror-model";
 import { Plugin } from "prosemirror-state";
 import { completeRequest, makeShorterLonger } from "./makeTaksRequest";
 import { CompletePluginState, Status, TaskType } from "./types";
@@ -21,7 +22,6 @@ export const completePlugin = (apiKey: string) =>
       },
       apply(tr, pluginState, prevState, state) {
         const meta = tr.getMeta(completePluginKey);
-        console.log({ pluginState, meta });
 
         if (
           pluginState.status === Status.done ||
@@ -83,12 +83,13 @@ export const completePlugin = (apiKey: string) =>
                 break;
               case TaskType.makeLonger:
               case TaskType.makeShorter:
-                if (pluginState.selection) {
-                  tr = tr.replaceWith(
-                    pluginState.selection.from,
-                    pluginState.selection.to,
-                    view.state.schema.text(pluginState.result || ""),
+                if (pluginState.selection && pluginState.result) {
+                  const fragment = Fragment.fromArray(
+                    Array.from(pluginState.result).map((char) =>
+                      view.state.schema.text(char),
+                    ),
                   );
+                  tr.selection.replace(tr, new Slice(fragment, 0, 0));
                 }
                 tr.setMeta(completePluginKey, {
                   type: pluginState.type,

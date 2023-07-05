@@ -45,7 +45,6 @@ const request = async (
       }
       const chunk = new TextDecoder().decode(value);
       try {
-        console.log({ chunk });
         res += JSON.parse(chunk)[Object.keys(JSON.parse(chunk))[0]];
         view.dispatch(
           view.state.tr.setMeta(completePluginKey, {
@@ -107,7 +106,6 @@ export const makeShorterLonger = (
   view: EditorView,
   apiKey: string,
 ) => {
-  console.log("makeShorterLonger", task);
   const selection = view.state.selection as TextSelection;
 
   if (!selection) {
