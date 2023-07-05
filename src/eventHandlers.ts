@@ -99,14 +99,17 @@ export const handleDocChange = (
   const { text, mapping } = docToTextWithMapping(tr.doc);
   if (text === oldText) return pluginState;
 
-  const diffStart = tr.doc.content.findDiffStart(oldState.doc.content);
-  const diffEnd = oldState.doc.content.findDiffEnd(tr.doc.content);
-  const map =
-    diffEnd && diffStart
-      ? new StepMap([diffStart, diffEnd.a - diffStart, diffEnd.b - diffStart])
-      : new StepMap([0, 0, 0]);
+  let pmMapping = tr.mapping;
 
-  const pmMapping = withYjs ? new Mapping([map]) : tr.mapping;
+  if (withYjs) {
+    const diffStart = tr.doc.content.findDiffStart(oldState.doc.content);
+    const diffEnd = oldState.doc.content.findDiffEnd(tr.doc.content);
+    const map =
+      diffEnd && diffStart
+        ? new StepMap([diffStart, diffEnd.a - diffStart, diffEnd.b - diffStart])
+        : new StepMap([0, 0, 0]);
+    pmMapping = new Mapping([map]);
+  }
 
   const changedRegion = getChangedRegions(oldText, text);
   const mappedDecorations = pluginState.decorations.map(pmMapping, tr.doc);
