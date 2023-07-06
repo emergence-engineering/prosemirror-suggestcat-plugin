@@ -107,12 +107,14 @@ export enum TaskType {
 }
 
 export enum Status {
+  idle = "idle",
   new = "new",
   streaming = "streaming",
   finished = "finished",
   accepted = "accepted",
   rejected = "rejected",
   done = "done",
+  error = "error",
 }
 
 export interface CompletePluginState {
@@ -120,9 +122,14 @@ export interface CompletePluginState {
   status?: Status;
   result?: string;
   selection?: TextSelection;
+  error?: string;
 }
 
 export interface TaskMeta {
   type: TaskType;
   status: Status.new | Status.accepted | Status.rejected;
+}
+
+export interface DefaultCompleteOptions {
+  maxSelection: number;
 }

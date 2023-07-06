@@ -105,6 +105,7 @@ export const makeShorterLonger = (
   pluginState: CompletePluginState,
   view: EditorView,
   apiKey: string,
+  maxSelection: number,
 ) => {
   const selection = view.state.selection as TextSelection;
 
@@ -114,6 +115,20 @@ export const makeShorterLonger = (
       view.state.tr.setMeta(completePluginKey, {
         task,
         status: Status.done,
+      }),
+    );
+    return;
+  }
+
+  // if selection is too big
+  const selectedText = view.state.doc.textBetween(selection.from, selection.to);
+  console.log({ selectedText });
+  if (selectedText.length > maxSelection) {
+    view.dispatch(
+      view.state.tr.setMeta(completePluginKey, {
+        type: task,
+        status: Status.error,
+        error: "Selection is too big",
       }),
     );
     return;

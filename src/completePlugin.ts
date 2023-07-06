@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { Fragment, Slice } from "prosemirror-model";
 import { Plugin } from "prosemirror-state";
+import { defaultCompleteOptions } from "./defaults";
 import { completeRequest, makeShorterLonger } from "./makeTaksRequest";
 import { CompletePluginState, Status, TaskType } from "./types";
 import { completePluginKey, isCompleteMeta } from "./utils";
@@ -13,21 +14,25 @@ import { completePluginKey, isCompleteMeta } from "./utils";
  * rejected - set status to done
  * done - clear state
  */
-export const completePlugin = (apiKey: string) =>
+export const completePlugin = (
+  apiKey: string,
+  options = defaultCompleteOptions,
+) =>
   new Plugin<CompletePluginState>({
     key: completePluginKey,
     state: {
       init() {
-        return {};
+        return { status: Status.idle };
       },
       apply(tr, pluginState, prevState, state) {
         const meta = tr.getMeta(completePluginKey);
+        console.log({ meta });
 
         if (
           pluginState.status === Status.done ||
           pluginState.status === Status.rejected
         ) {
-          return {};
+          return { status: Status.idle };
         }
 
         if (meta && isCompleteMeta(meta)) {
@@ -60,7 +65,13 @@ export const completePlugin = (apiKey: string) =>
                 break;
               case TaskType.makeLonger:
               case TaskType.makeShorter:
-                makeShorterLonger(pluginState.type, pluginState, view, apiKey);
+                makeShorterLonger(
+                  pluginState.type,
+                  pluginState,
+                  view,
+                  apiKey,
+                  options.maxSelection,
+                );
                 console.log("makeShorterLonger");
                 break;
               default:
@@ -68,6 +79,15 @@ export const completePlugin = (apiKey: string) =>
             }
           }
           if (pluginState.status === Status.accepted) {
+            if (pluginState.error) {
+              tr.setMeta(completePluginKey, {
+                type: pluginState.type,
+                status: Status.done,
+              });
+              view.dispatch(tr);
+              return;
+            }
+
             switch (pluginState.type) {
               case TaskType.complete:
                 tr = tr.insertText(
