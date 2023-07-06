@@ -76,6 +76,58 @@ const request = async (
   }
 };
 
+// write the above dunction using server-sent events
+const sseRequest = async (
+  apiKey: string,
+  text: string,
+  pluginState: CompletePluginState,
+  view: EditorView,
+  task: TaskType,
+  selection?: TextSelection,
+) => {
+  const eventSource = new EventSource(
+    "https://suggestion-gw5lxik4dq-uc.a.run.app",
+  );
+
+  let res = "";
+
+  eventSource.onmessage = (event) => {
+    console.log("data", event.data);
+    res += event.data;
+    view.dispatch(
+      view.state.tr.setMeta(completePluginKey, {
+        type: task,
+        status: Status.streaming,
+        result: res,
+        ...(selection && { selection }),
+      }),
+    );
+  };
+
+  eventSource.onerror = (error) => {
+    console.error("Error:", error);
+    view.dispatch(
+      view.state.tr.setMeta(completePluginKey, {
+        type: task,
+        status: Status.error,
+        result: error,
+        ...(selection && { selection }),
+      }),
+    );
+  };
+
+  eventSource.addEventListener("close", () => {
+    view.dispatch(
+      view.state.tr.setMeta(completePluginKey, {
+        type: task,
+        status: Status.finished,
+        result: pluginState.result,
+        ...(selection && { selection }),
+      }),
+    );
+  });
+};
+
 export const completeRequest = async (
   pluginState: CompletePluginState,
   view: EditorView,
@@ -135,5 +187,5 @@ export const makeShorterLonger = (
   }
 
   const text = view.state.doc.textBetween(selection.from, selection.to, "\n");
-  request(apiKey, text, pluginState, view, task, selection);
+  sseRequest(apiKey, text, pluginState, view, task, selection);
 };
