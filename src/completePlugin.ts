@@ -7,12 +7,14 @@ import { CompletePluginState, Status, TaskType } from "./types";
 import { completePluginKey, isCompleteMeta } from "./utils";
 
 /*
+ * idle - initial state, waiting for task
  * new - make request in view
  * streaming - update state in apply method and wait for finished
  * finished - update state in apply method and wait for accepted or rejected
- * accepted - insert/replace text in view and set status to done
+ * accepted - insert/replace text in view and set status to done, also used for clearing an error
  * rejected - set status to done
- * done - clear state
+ * done - used for clearing pluginState, do not use, it is just for internal state management
+ * error - whenever an error occurs, this field gets populated so you can display it for the user, use `accepted`* meta to clear it
  */
 export const completePlugin = (
   apiKey: string,
