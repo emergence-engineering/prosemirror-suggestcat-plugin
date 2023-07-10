@@ -14,28 +14,25 @@ const request = async (
 ) => {
   let res = "";
   try {
-    const response = await fetch(
-      "https://prosemirror-ai-plugin.web.app/api/suggestion",
-      {
-        method: "POST",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer -qKivjCv6MfQSmgF438PjEY7RnLfqoVe",
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-
-          modelParams: {
-            input: [text],
-            task,
-            params: {
-              // targetLanguage: "German"
-            },
-          },
-        }),
+    const response = await fetch("https://suggestion-gw5lxik4dq-uc.a.run.app", {
+      method: "POST",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer -qKivjCv6MfQSmgF438PjEY7RnLfqoVe",
       },
-    );
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+
+        modelParams: {
+          input: [text],
+          task,
+          params: {
+            // targetLanguage: "German"
+          },
+        },
+      }),
+    });
 
     const reader = response.body?.getReader();
 
@@ -45,7 +42,8 @@ const request = async (
       }
       const chunk = new TextDecoder().decode(value);
       try {
-        res += JSON.parse(chunk)[Object.keys(JSON.parse(chunk))[0]];
+        res += chunk;
+        console.log({ res, chunk });
         view.dispatch(
           view.state.tr.setMeta(completePluginKey, {
             type: task,
