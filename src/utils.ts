@@ -4,15 +4,17 @@ import diff from "fast-diff";
 
 import {
   ChangedRegion,
-  GrammarSuggestPluginState,
+  GrammarSuggestPluginState, OpenAiPromptsWithoutParam, OpenAiPromptsWithParam,
   TaskMeta,
-  TaskType,
 } from "./types";
 
 export const completePluginKey = new PluginKey("completePlugin");
 
 export const isCompleteMeta = (meta: any): meta is TaskMeta => {
-  return Object.values(TaskType).includes(meta.type);
+  return (
+    Object.values(OpenAiPromptsWithParam).includes(meta.type) ||
+    Object.values(OpenAiPromptsWithoutParam).includes(meta.type)
+  );
 };
 
 export const grammarSuggestPluginKey = new PluginKey<GrammarSuggestPluginState>(

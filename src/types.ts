@@ -100,11 +100,38 @@ export enum GrammarSuggestElementClass {
   grammarSuggestPopup = "grammar-suggest-popup",
 }
 
-export enum TaskType {
-  complete = "Complete",
-  makeLonger = "MakeLonger",
-  makeShorter = "MakeShorter",
+export enum MoodParamType {
+  Casual = "Casual",
+  Confident = "Confident",
+  Straightforward = "Straightforward",
+  Friendly = "Friendly",
 }
+
+export const enum TranslationTargetLanguage {
+  Spanish = "Spanish",
+  Chinese = "Chinese",
+  French = "French",
+  Japanese = "Japanese",
+}
+
+export type TranslationParams = { targetLanguage: TranslationTargetLanguage };
+export type MoodParams = { mood: MoodParamType };
+export enum OpenAiPromptsWithoutParam {
+  Complete = "Complete",
+  Improve = "Improve",
+  MakeLonger = "MakeLonger",
+  MakeShorter = "MakeShorter",
+  Simplify = "Simplify",
+  Explain = "Explain",
+  ActionItems = "ActionItems",
+}
+
+export enum OpenAiPromptsWithParam {
+  ChangeTone = "ChangeTone",
+  Translate = "Translate",
+}
+
+export type TaskType = OpenAiPromptsWithoutParam | OpenAiPromptsWithParam;
 
 export enum Status {
   idle = "idle",
@@ -119,6 +146,7 @@ export enum Status {
 
 export interface CompletePluginState {
   type?: TaskType;
+  params?: MoodParams | TranslationParams | undefined;
   status?: Status;
   result?: string;
   selection?: TextSelection;

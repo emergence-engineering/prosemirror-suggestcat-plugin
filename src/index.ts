@@ -5,7 +5,12 @@ export { completePlugin } from "./completePlugin";
 export {
   DefaultCompleteOptions,
   TaskMeta,
-  TaskType,
+  OpenAiPromptsWithParam,
+  OpenAiPromptsWithoutParam,
   Status,
   CompletePluginState,
+  MoodParamType,
+  MoodParams,
+  TranslationParams,
+  TranslationTargetLanguage,
 } from "./types";

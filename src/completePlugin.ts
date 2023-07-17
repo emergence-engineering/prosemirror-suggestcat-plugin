@@ -3,7 +3,11 @@ import { Fragment, Slice } from "prosemirror-model";
 import { Plugin } from "prosemirror-state";
 import { defaultCompleteOptions } from "./defaults";
 import { completeRequest, makeShorterLonger } from "./makeTaksRequest";
-import { CompletePluginState, Status, TaskType } from "./types";
+import {
+  CompletePluginState,
+  OpenAiPromptsWithoutParam, OpenAiPromptsWithParam,
+  Status,
+} from "./types";
 import { completePluginKey, isCompleteMeta } from "./utils";
 
 /*
@@ -61,20 +65,27 @@ export const completePlugin = (
           let tr = view.state.tr;
           if (pluginState.status === Status.new) {
             switch (pluginState.type) {
-              case TaskType.complete:
+              case OpenAiPromptsWithoutParam.Complete:
                 completeRequest(pluginState, view, apiKey);
                 console.log("complete");
                 break;
-              case TaskType.makeLonger:
-              case TaskType.makeShorter:
+              case OpenAiPromptsWithoutParam.MakeLonger:
+              case OpenAiPromptsWithoutParam.MakeShorter:
+              case OpenAiPromptsWithoutParam.Improve:
+              case OpenAiPromptsWithoutParam.Simplify:
+              case OpenAiPromptsWithoutParam.Explain:
+              case OpenAiPromptsWithoutParam.ActionItems:
+              case OpenAiPromptsWithParam.Translate:
+              case OpenAiPromptsWithParam.ChangeTone:
                 makeShorterLonger(
                   pluginState.type,
                   pluginState,
                   view,
                   apiKey,
                   options.maxSelection,
+                  pluginState.params,
                 );
-                console.log("makeShorterLonger");
+                console.log("improve selected text");
                 break;
               default:
                 break;
@@ -91,20 +102,24 @@ export const completePlugin = (
             }
 
             switch (pluginState.type) {
-              case TaskType.complete:
+              case OpenAiPromptsWithoutParam.Complete:
                 tr = tr.insertText(
                   pluginState.result || "",
                   view.state.doc.nodeSize - 2,
                 );
                 tr.setMeta(completePluginKey, {
-                  type: TaskType.complete,
+                  type: OpenAiPromptsWithoutParam.Complete,
                   status: Status.done,
                 });
                 view.dispatch(tr);
                 console.log("complete accepted");
                 break;
-              case TaskType.makeLonger:
-              case TaskType.makeShorter:
+              case OpenAiPromptsWithoutParam.MakeLonger:
+              case OpenAiPromptsWithoutParam.MakeShorter:
+              case OpenAiPromptsWithoutParam.Improve:
+              case OpenAiPromptsWithoutParam.Simplify:
+              case OpenAiPromptsWithoutParam.Explain:
+              case OpenAiPromptsWithoutParam.ActionItems:
                 if (pluginState.selection && pluginState.result) {
                   const fragment = Fragment.fromArray(
                     Array.from(pluginState.result).map((char) =>

@@ -1,7 +1,12 @@
 import { EditorView } from "prosemirror-view";
 import { EditorState, TextSelection } from "prosemirror-state";
 import { Node } from "prosemirror-model";
-import { CompletePluginState, Status, TaskType } from "./types";
+import {
+  CompletePluginState, MoodParams,
+  OpenAiPromptsWithoutParam,
+  Status,
+  TaskType, TranslationParams,
+} from "./types";
 import { completePluginKey } from "./utils";
 
 const request = async (
@@ -11,6 +16,7 @@ const request = async (
   view: EditorView,
   task: TaskType,
   selection?: TextSelection,
+  params?: MoodParams | TranslationParams
 ) => {
   let res = "";
   try {
@@ -27,9 +33,7 @@ const request = async (
         modelParams: {
           input: [text],
           task,
-          params: {
-            // targetLanguage: "German"
-          },
+          params,
         },
       }),
     });
@@ -95,7 +99,7 @@ export const completeRequest = async (
     text = paragraphNodes.join(" ");
   }
 
-  request(apiKey, text, pluginState, view, TaskType.complete);
+  request(apiKey, text, pluginState, view, OpenAiPromptsWithoutParam.Complete);
 };
 
 export const makeShorterLonger = (
@@ -104,6 +108,7 @@ export const makeShorterLonger = (
   view: EditorView,
   apiKey: string,
   maxSelection: number,
+  params?: MoodParams | TranslationParams,
 ) => {
   const selection = view.state.selection as TextSelection;
 
@@ -133,5 +138,5 @@ export const makeShorterLonger = (
   }
 
   const text = view.state.doc.textBetween(selection.from, selection.to, "\n");
-  request(apiKey, text, pluginState, view, task, selection);
+  request(apiKey, text, pluginState, view, task, selection, params);
 };
