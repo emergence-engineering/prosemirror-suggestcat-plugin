@@ -107,10 +107,18 @@ export enum MoodParamType {
   Friendly = "Friendly",
 }
 
+
 export const enum TranslationTargetLanguage {
+  English = "English",
   Spanish = "Spanish",
-  Chinese = "Chinese",
   French = "French",
+  German = "German",
+  Italian = "Italian",
+  Portuguese = "Portuguese",
+  Dutch = "Dutch",
+  Russian = "Russian",
+  Chinese = "Chinese",
+  Korean = "Korean",
   Japanese = "Japanese",
 }
 
