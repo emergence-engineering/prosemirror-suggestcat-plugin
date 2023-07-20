@@ -2,10 +2,12 @@ import { EditorView } from "prosemirror-view";
 import { EditorState, TextSelection } from "prosemirror-state";
 import { Node } from "prosemirror-model";
 import {
-  CompletePluginState, MoodParams,
+  CompletePluginState,
+  MoodParams,
   OpenAiPromptsWithoutParam,
   Status,
-  TaskType, TranslationParams,
+  TaskType,
+  TranslationParams,
 } from "./types";
 import { completePluginKey } from "./utils";
 
@@ -16,7 +18,7 @@ const request = async (
   view: EditorView,
   task: TaskType,
   selection?: TextSelection,
-  params?: MoodParams | TranslationParams
+  params?: MoodParams | TranslationParams,
 ) => {
   let res = "";
   try {
