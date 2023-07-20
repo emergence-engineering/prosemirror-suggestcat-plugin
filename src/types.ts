@@ -1,4 +1,5 @@
 import { Decoration, DecorationSet, EditorView } from "prosemirror-view";
+import { TextSelection } from "prosemirror-state";
 
 export type TextMappingItem = {
   docPos: number;
@@ -98,4 +99,73 @@ export type PopupDecorationSpec = {
 
 export enum GrammarSuggestElementClass {
   grammarSuggestPopup = "grammar-suggest-popup",
+}
+
+export enum MoodParamType {
+  Casual = "Casual",
+  Confident = "Confident",
+  Straightforward = "Straightforward",
+  Friendly = "Friendly",
+}
+
+export enum TranslationTargetLanguage {
+  English = "English",
+  Spanish = "Spanish",
+  French = "French",
+  German = "German",
+  Italian = "Italian",
+  Portuguese = "Portuguese",
+  Dutch = "Dutch",
+  Russian = "Russian",
+  Chinese = "Chinese",
+  Korean = "Korean",
+  Japanese = "Japanese",
+}
+
+export type TranslationParams = { targetLanguage: TranslationTargetLanguage };
+export type MoodParams = { mood: MoodParamType };
+export enum OpenAiPromptsWithoutParam {
+  Complete = "Complete",
+  Improve = "Improve",
+  MakeLonger = "MakeLonger",
+  MakeShorter = "MakeShorter",
+  Simplify = "Simplify",
+  Explain = "Explain",
+  ActionItems = "ActionItems",
+}
+
+export enum OpenAiPromptsWithParam {
+  ChangeTone = "ChangeTone",
+  Translate = "Translate",
+}
+
+export type TaskType = OpenAiPromptsWithoutParam | OpenAiPromptsWithParam;
+
+export enum Status {
+  idle = "idle",
+  new = "new",
+  streaming = "streaming",
+  finished = "finished",
+  accepted = "accepted",
+  rejected = "rejected",
+  done = "done",
+  error = "error",
+}
+
+export interface CompletePluginState {
+  type?: TaskType;
+  params?: MoodParams | TranslationParams | undefined;
+  status?: Status;
+  result?: string;
+  selection?: TextSelection;
+  error?: string;
+}
+
+export interface TaskMeta {
+  type: TaskType;
+  status: Status.new | Status.accepted | Status.rejected;
+}
+
+export interface DefaultCompleteOptions {
+  maxSelection: number;
 }

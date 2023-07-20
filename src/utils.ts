@@ -2,7 +2,25 @@ import { PluginKey } from "prosemirror-state";
 import { Node } from "prosemirror-model";
 import diff from "fast-diff";
 
-import { ChangedRegion, GrammarSuggestPluginState } from "./types";
+import {
+  ChangedRegion,
+  CompletePluginState,
+  GrammarSuggestPluginState,
+  OpenAiPromptsWithoutParam,
+  OpenAiPromptsWithParam,
+  TaskMeta,
+} from "./types";
+
+export const completePluginKey = new PluginKey<CompletePluginState>(
+  "completePlugin",
+);
+
+export const isCompleteMeta = (meta: any): meta is TaskMeta => {
+  return (
+    Object.values(OpenAiPromptsWithParam).includes(meta.type) ||
+    Object.values(OpenAiPromptsWithoutParam).includes(meta.type)
+  );
+};
 
 export const grammarSuggestPluginKey = new PluginKey<GrammarSuggestPluginState>(
   "grammarSuggestPlugin",
