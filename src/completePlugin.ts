@@ -5,7 +5,8 @@ import { defaultCompleteOptions } from "./defaults";
 import { completeRequest, makeShorterLonger } from "./makeTaksRequest";
 import {
   CompletePluginState,
-  OpenAiPromptsWithoutParam, OpenAiPromptsWithParam,
+  OpenAiPromptsWithoutParam,
+  OpenAiPromptsWithParam,
   Status,
 } from "./types";
 import { completePluginKey, isCompleteMeta } from "./utils";
@@ -25,6 +26,15 @@ export const completePlugin = (
   options = defaultCompleteOptions,
 ) =>
   new Plugin<CompletePluginState>({
+    // props: {
+    //   handleKeyDown(view, event) {
+    //     const pluginState = completePluginKey.getState(view.state);
+    //     return (
+    //       pluginState?.status !== Status.idle &&
+    //       (event.key === "Enter" || event.key === "Tab")
+    //     );
+    //   },
+    // },
     key: completePluginKey,
     state: {
       init() {
@@ -32,7 +42,6 @@ export const completePlugin = (
       },
       apply(tr, pluginState, prevState, state) {
         const meta = tr.getMeta(completePluginKey);
-        console.log({ meta });
 
         if (
           pluginState.status === Status.done ||
@@ -58,12 +67,10 @@ export const completePlugin = (
     view() {
       return {
         update(view, prevState) {
-          const pluginState: CompletePluginState = completePluginKey.getState(
-            view.state,
-          );
+          const pluginState = completePluginKey.getState(view.state);
           /* eslint-disable prefer-destructuring */
           let tr = view.state.tr;
-          if (pluginState.status === Status.new) {
+          if (pluginState?.status === Status.new) {
             switch (pluginState.type) {
               case OpenAiPromptsWithoutParam.Complete:
                 completeRequest(pluginState, view, apiKey);
@@ -91,13 +98,14 @@ export const completePlugin = (
                 break;
             }
           }
-          if (pluginState.status === Status.accepted) {
+          if (pluginState?.status === Status.accepted) {
             if (pluginState.error) {
               tr.setMeta(completePluginKey, {
                 type: pluginState.type,
                 status: Status.done,
               });
               view.dispatch(tr);
+
               return;
             }
 
@@ -112,7 +120,8 @@ export const completePlugin = (
                   status: Status.done,
                 });
                 view.dispatch(tr);
-                console.log("complete accepted");
+                view.focus();
+                console.log("complete accepted V1");
                 break;
               case OpenAiPromptsWithoutParam.MakeLonger:
               case OpenAiPromptsWithoutParam.MakeShorter:
@@ -133,7 +142,8 @@ export const completePlugin = (
                   status: Status.done,
                 });
                 view.dispatch(tr);
-                console.log("makeShorterLonger accepted");
+                view.focus();
+                console.log("makeShorterLonger acceptedV1");
                 break;
               default:
                 break;

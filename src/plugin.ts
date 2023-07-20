@@ -1,11 +1,17 @@
-import { Plugin, PluginKey } from "prosemirror-state";
+import { Plugin } from "prosemirror-state";
 import { DecorationSet } from "prosemirror-view";
-import { getTextWithNewlines, grammarSuggestPluginKey } from "./utils";
 import {
+  completePluginKey,
+  getTextWithNewlines,
+  grammarSuggestPluginKey,
+} from "./utils";
+import {
+  CompletePluginState,
   GrammarPluginMeta,
   GrammarSuggestMetaType,
   GrammarSuggestPluginOptions,
   GrammarSuggestPluginState,
+  Status,
 } from "./types";
 import { createMakeRequest } from "./makeRequest";
 import {
@@ -65,6 +71,9 @@ export const grammarSuggestPlugin = (
       decorations: (state) => {
         const pluginState = grammarSuggestPluginKey.getState(state);
         if (!pluginState) return null;
+        const completePluginState = completePluginKey.getState(state);
+        if (completePluginState?.status !== Status.idle)
+          return pluginState.decorations;
         return pluginState.decorations.add(
           state.doc,
           pluginState.popupDecoration.find(),
