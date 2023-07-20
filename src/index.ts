@@ -3,14 +3,16 @@ export { defaultOptions, defaultCompleteOptions } from "./defaults";
 export { completePluginKey } from "./utils";
 export { completePlugin } from "./completePlugin";
 export {
-  DefaultCompleteOptions,
-  TaskMeta,
   OpenAiPromptsWithParam,
   OpenAiPromptsWithoutParam,
   Status,
-  CompletePluginState,
   MoodParamType,
+  TranslationTargetLanguage,
+} from "./types";
+export type {
+  DefaultCompleteOptions,
+  TaskMeta,
+  CompletePluginState,
   MoodParams,
   TranslationParams,
-  TranslationTargetLanguage,
 } from "./types";

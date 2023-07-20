@@ -107,8 +107,7 @@ export enum MoodParamType {
   Friendly = "Friendly",
 }
 
-
-export const enum TranslationTargetLanguage {
+export enum TranslationTargetLanguage {
   English = "English",
   Spanish = "Spanish",
   French = "French",

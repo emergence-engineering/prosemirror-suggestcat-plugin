@@ -9,7 +9,8 @@
     "declarationDir": "./dist",
     "outDir": "./dist",
     "strict": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
   },
   "compileOnSave": true,
   "include": ["src/**/*.ts"],
