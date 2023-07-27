@@ -6,11 +6,12 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "declaration": true,
+    "declarationMap": true,
     "declarationDir": "./dist",
     "outDir": "./dist",
     "strict": true,
     "allowSyntheticDefaultImports": true,
-    "isolatedModules": true,
+    "isolatedModules": true
   },
   "compileOnSave": true,
   "include": ["src/**/*.ts"],
