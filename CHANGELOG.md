@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.4
+
+### Patch Changes
+
+- add translate and changetone
+
 ## 0.1.3
 
 ### Patch Changes

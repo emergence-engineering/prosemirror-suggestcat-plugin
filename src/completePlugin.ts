@@ -124,6 +124,8 @@ export const completePlugin = (
               case OpenAiPromptsWithoutParam.Simplify:
               case OpenAiPromptsWithoutParam.Explain:
               case OpenAiPromptsWithoutParam.ActionItems:
+              case OpenAiPromptsWithParam.Translate:
+              case OpenAiPromptsWithParam.ChangeTone:
                 if (pluginState.selection && pluginState.result) {
                   const content = pluginState.result;
                   const paragraphs = content.split("\n\n");
