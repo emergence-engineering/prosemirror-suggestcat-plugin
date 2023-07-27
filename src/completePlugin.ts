@@ -130,11 +130,19 @@ export const completePlugin = (
               case OpenAiPromptsWithoutParam.Explain:
               case OpenAiPromptsWithoutParam.ActionItems:
                 if (pluginState.selection && pluginState.result) {
-                  const fragment = Fragment.fromArray(
-                    Array.from(pluginState.result).map((char) =>
-                      view.state.schema.text(char),
+                  const content = pluginState.result;
+                  const paragraphs = content.split("\n\n");
+
+                  const paragraphNodes = paragraphs.map((paragraph) =>
+                    view.state.schema.node(
+                      "paragraph",
+                      null,
+                      view.state.schema.text(paragraph),
                     ),
                   );
+
+                  const fragment = Fragment.fromArray(paragraphNodes);
+
                   tr.selection.replace(tr, new Slice(fragment, 0, 0));
                 }
                 tr.setMeta(completePluginKey, {
