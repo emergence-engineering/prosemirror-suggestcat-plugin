@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.3
+
+### Patch Changes
+
+- fix double request
+
 ## 0.1.2
 
 ### Patch Changes

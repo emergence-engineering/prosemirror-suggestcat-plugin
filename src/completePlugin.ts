@@ -24,17 +24,9 @@ import { completePluginKey, isCompleteMeta } from "./utils";
 export const completePlugin = (
   apiKey: string,
   options = defaultCompleteOptions,
-) =>
-  new Plugin<CompletePluginState>({
-    // props: {
-    //   handleKeyDown(view, event) {
-    //     const pluginState = completePluginKey.getState(view.state);
-    //     return (
-    //       pluginState?.status !== Status.idle &&
-    //       (event.key === "Enter" || event.key === "Tab")
-    //     );
-    //   },
-    // },
+) => {
+  let streaming = false;
+  return new Plugin<CompletePluginState>({
     key: completePluginKey,
     state: {
       init() {
@@ -70,9 +62,10 @@ export const completePlugin = (
           const pluginState = completePluginKey.getState(view.state);
           /* eslint-disable prefer-destructuring */
           let tr = view.state.tr;
-          if (pluginState?.status === Status.new) {
+          if (pluginState?.status === Status.new && !streaming) {
             switch (pluginState.type) {
               case OpenAiPromptsWithoutParam.Complete:
+                streaming = true;
                 completeRequest(pluginState, view, apiKey);
                 console.log("complete");
                 break;
@@ -84,6 +77,7 @@ export const completePlugin = (
               case OpenAiPromptsWithoutParam.ActionItems:
               case OpenAiPromptsWithParam.Translate:
               case OpenAiPromptsWithParam.ChangeTone:
+                streaming = true;
                 makeShorterLonger(
                   pluginState.type,
                   pluginState,
@@ -99,6 +93,7 @@ export const completePlugin = (
             }
           }
           if (pluginState?.status === Status.accepted) {
+            streaming = false;
             if (pluginState.error) {
               tr.setMeta(completePluginKey, {
                 type: pluginState.type,
@@ -161,3 +156,4 @@ export const completePlugin = (
       };
     },
   });
+};
