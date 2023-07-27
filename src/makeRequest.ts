@@ -77,7 +77,7 @@ const myApiRequest = async (
 export const createMakeRequest = (
   options: GrammarSuggestPluginOptions,
   apiKey: string,
-): ((view:EditorView)=>void) =>
+): ((view: EditorView) => void) =>
   debounce((view: EditorView) => {
     // The document changed, start API request
     const versionAtRequestStart = docToTextWithMapping(view.state.doc);
