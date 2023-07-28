@@ -15,8 +15,12 @@ export const createUpdatePopup = (
   const boundingRect = view.dom.getBoundingClientRect();
   root.id = GrammarSuggestElementClass.grammarSuggestPopup;
   const coords = view.coordsAtPos(pos);
-  root.style.left = `${coords.left - boundingRect.left}px`;
-  root.style.top = `${coords.bottom - boundingRect.top + 5}px`;
+  const editorTopScroll = view.dom.scrollTop || 0;
+  const editorLeftScroll = view.dom.scrollLeft || 0;
+  root.style.left = `${coords.left - boundingRect.left + editorLeftScroll}px`;
+  root.style.top = `${
+    coords.bottom - boundingRect.top + editorTopScroll + 5
+  }px`;
 
   const applyButton = document.createElement("div");
   applyButton.className = "grammar-suggest-tooltip-apply";

@@ -17,9 +17,9 @@ const isJsonString = (str: string) => {
   try {
     JSON.parse(str);
   } catch (e) {
-    return false;
+    return true;
   }
-  return true;
+  return false;
 };
 
 const myApiRequest = async (
@@ -49,7 +49,7 @@ const myApiRequest = async (
       return Promise.reject(response);
     })
     .then((jsonData) => {
-      if (!jsonData || !jsonData.some((i: string) => isJsonString(i))) {
+      if (!jsonData || jsonData.some((i: string) => isJsonString(i))) {
         return {
           fixed: false,
           result: text,
