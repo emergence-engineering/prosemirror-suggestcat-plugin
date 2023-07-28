@@ -39,6 +39,7 @@ export const completePlugin = (
           pluginState.status === Status.done ||
           pluginState.status === Status.rejected
         ) {
+          streaming = false;
           return { status: Status.idle };
         }
 
@@ -93,7 +94,6 @@ export const completePlugin = (
             }
           }
           if (pluginState?.status === Status.accepted) {
-            streaming = false;
             if (pluginState.error) {
               tr.setMeta(completePluginKey, {
                 type: pluginState.type,
