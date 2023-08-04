@@ -147,6 +147,7 @@ export enum Status {
   streaming = "streaming",
   finished = "finished",
   accepted = "accepted",
+  cancelled = "cancelled",
   rejected = "rejected",
   done = "done",
   error = "error",
@@ -159,11 +160,12 @@ export interface CompletePluginState {
   result?: string;
   selection?: TextSelection;
   error?: string;
+  isCancelled?: boolean;
 }
 
 export interface TaskMeta {
   type: TaskType;
-  status: Status.new | Status.accepted | Status.rejected;
+  status: Status.new | Status.accepted | Status.rejected | Status.cancelled;
 }
 
 export interface DefaultCompleteOptions {

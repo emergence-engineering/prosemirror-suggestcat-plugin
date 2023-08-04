@@ -43,6 +43,14 @@ export const completePlugin = (
           return { status: Status.idle };
         }
 
+        if (meta?.status === Status.cancelled) {
+          return {
+            ...pluginState,
+            ...meta,
+            ...{ isCancelled: true },
+          };
+        }
+
         if (meta && isCompleteMeta(meta)) {
           if (pluginState.type && meta.type !== pluginState.type) {
             return pluginState;
