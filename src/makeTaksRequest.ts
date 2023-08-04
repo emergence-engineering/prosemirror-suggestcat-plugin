@@ -1,5 +1,5 @@
 import { EditorView } from "prosemirror-view";
-import { EditorState, TextSelection } from "prosemirror-state";
+import { TextSelection } from "prosemirror-state";
 import { Node } from "prosemirror-model";
 import {
   CompletePluginState,
@@ -21,6 +21,7 @@ const request = async (
   params?: MoodParams | TranslationParams,
 ) => {
   let res = "";
+  const controller = new AbortController();
   try {
     const response = await fetch("https://suggestion-gw5lxik4dq-uc.a.run.app", {
       method: "POST",
@@ -29,6 +30,7 @@ const request = async (
         "Content-Type": "application/json",
         Authorization: "Bearer -qKivjCv6MfQSmgF438PjEY7RnLfqoVe",
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
 
@@ -46,7 +48,14 @@ const request = async (
       if (done) {
         return;
       }
+
+      if (completePluginKey.getState(view.state)?.isCancelled) {
+        await controller.abort();
+        return;
+      }
+
       const chunk = new TextDecoder().decode(value);
+
       try {
         res += chunk;
         console.log({ res, chunk });
