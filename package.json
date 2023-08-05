@@ -1,12 +1,11 @@
 {
   "name": "prosemirror-suggestcat-plugin",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "module": "dist/index.es.js",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "prebuild": "rimraf dist",
     "build": "rollup -c --bundleConfigAsCjs",
     "rebuild": "rollup -c --bundleConfigAsCjs",
