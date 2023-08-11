@@ -76,7 +76,6 @@ export const completePlugin = (
               case OpenAiPromptsWithoutParam.Complete:
                 streaming = true;
                 completeRequest(pluginState, view, apiKey);
-                console.log("complete");
                 break;
               case OpenAiPromptsWithoutParam.MakeLonger:
               case OpenAiPromptsWithoutParam.MakeShorter:
@@ -95,7 +94,6 @@ export const completePlugin = (
                   options.maxSelection,
                   pluginState.params,
                 );
-                console.log("improve selected text");
                 break;
               default:
                 break;
@@ -124,7 +122,6 @@ export const completePlugin = (
                 });
                 view.dispatch(tr);
                 view.focus();
-                console.log("complete accepted V1");
                 break;
               case OpenAiPromptsWithoutParam.MakeLonger:
               case OpenAiPromptsWithoutParam.MakeShorter:
@@ -156,7 +153,6 @@ export const completePlugin = (
                 });
                 view.dispatch(tr);
                 view.focus();
-                console.log("makeShorterLonger acceptedV1");
                 break;
               default:
                 break;
