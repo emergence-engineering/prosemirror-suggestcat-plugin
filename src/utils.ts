@@ -88,15 +88,6 @@ export const getChangedRegions = (
     lastNewlinePosFromLastChange === -1
       ? oldText.length
       : lastNewlinePosFromLastChange;
-  // console.log({
-  //   oldText,
-  //   lastChangePos,
-  //   lastNewlinePosFromLastChange,
-  //   oldEnd,
-  //   firstChangePos,
-  //   firstNewlinePosFromFirstChange,
-  //   oldStart,
-  // });
   const oldChange = oldText.slice(oldStart, oldEnd);
   const newChange = newText.slice(
     oldStart,
