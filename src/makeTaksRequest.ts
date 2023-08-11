@@ -58,7 +58,6 @@ const request = async (
 
       try {
         res += chunk;
-        console.log({ res, chunk });
         view.dispatch(
           view.state.tr.setMeta(completePluginKey, {
             type: task,
@@ -124,7 +123,6 @@ export const makeShorterLonger = (
   const selection = view.state.selection as TextSelection;
 
   if (!selection) {
-    console.log("No selection");
     view.dispatch(
       view.state.tr.setMeta(completePluginKey, {
         task,
@@ -136,7 +134,6 @@ export const makeShorterLonger = (
 
   // if selection is too big
   const selectedText = view.state.doc.textBetween(selection.from, selection.to);
-  console.log({ selectedText });
   if (selectedText.length > maxSelection) {
     view.dispatch(
       view.state.tr.setMeta(completePluginKey, {
