@@ -1,5 +1,12 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.8
+
+### Patch Changes
+
+- Bugfixes and readme changes
+- Bugfixes and readme
+
 ## 0.1.7
 
 ### Patch Changes
