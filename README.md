@@ -172,9 +172,17 @@ view.dispatch(
 
 ```ts
 export enum TaskType {
-  complete = "Complete",
-  makeLonger = "MakeLonger",
-  makeShorter = "MakeShorter",
+    Complete = "Complete",
+    Improve = "Improve",
+    MakeLonger = "MakeLonger",
+    MakeShorter = "MakeShorter",
+    Simplify = "Simplify",
+    Explain = "Explain",
+    ActionItems = "ActionItems",
+}
+export enum OpenAiPromptsWithParam {
+    ChangeTone = "ChangeTone",
+    Translate = "Translate",
 }
 
 export enum Status {
