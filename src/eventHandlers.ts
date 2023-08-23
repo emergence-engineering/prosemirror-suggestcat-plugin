@@ -1,5 +1,5 @@
 import { Decoration, DecorationSet, EditorView } from "prosemirror-view";
-import { EditorState, Transaction } from "prosemirror-state";
+import { EditorState, TextSelection, Transaction } from "prosemirror-state";
 import { Mapping, StepMap } from "prosemirror-transform";
 
 import {
@@ -21,6 +21,7 @@ import {
 } from "./utils";
 import { getDiff, isIdentity } from "./mergeDiffs";
 import { docToTextWithMapping, textPosToDocPos } from "./mapping";
+import { Fragment, Slice } from "prosemirror-model";
 
 export const handleUpdate = (
   pluginState: GrammarSuggestPluginState,
@@ -146,9 +147,25 @@ const applySuggestion = (view: EditorView, decoration: Decoration) => {
     type: GrammarSuggestMetaType.acceptSuggestion,
     id: decoration.spec.id,
   };
-  const tr = view.state.tr
-    .insertText(text, from, to)
-    .setMeta(grammarSuggestPluginKey, meta);
+
+  const paragraphs = text.split("\n");
+
+  const paragraphNodes = paragraphs.map((paragraph) =>
+    view.state.schema.node(
+      "paragraph",
+      null,
+      view.state.schema.text(paragraph),
+    ),
+  );
+
+  const fragment = Fragment.fromArray(paragraphNodes);
+
+  let { tr } = view.state;
+  tr = tr.setSelection(TextSelection.create(view.state.doc, from, to));
+
+  tr.selection.replace(tr, new Slice(fragment, 1, 1));
+
+  tr.setMeta(grammarSuggestPluginKey, meta);
   view.dispatch(tr);
 };
 
