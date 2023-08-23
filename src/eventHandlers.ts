@@ -1,6 +1,7 @@
 import { Decoration, DecorationSet, EditorView } from "prosemirror-view";
 import { EditorState, TextSelection, Transaction } from "prosemirror-state";
 import { Mapping, StepMap } from "prosemirror-transform";
+import { Fragment, Slice } from "prosemirror-model";
 
 import {
   AcceptSuggestionMeta,
@@ -21,7 +22,6 @@ import {
 } from "./utils";
 import { getDiff, isIdentity } from "./mergeDiffs";
 import { docToTextWithMapping, textPosToDocPos } from "./mapping";
-import { Fragment, Slice } from "prosemirror-model";
 
 export const handleUpdate = (
   pluginState: GrammarSuggestPluginState,

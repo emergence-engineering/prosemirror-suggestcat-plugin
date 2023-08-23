@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.10
+
+### Patch Changes
+
+- recover from detached head
+
 ## 0.1.9
 
 ### Patch Changes
