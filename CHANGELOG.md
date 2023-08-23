@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.9
+
+### Patch Changes
+
+- fix detached-head state
+
 ## 0.1.8
 
 ### Patch Changes
