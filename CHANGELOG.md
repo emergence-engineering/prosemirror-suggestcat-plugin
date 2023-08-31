@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.11
+
+### Patch Changes
+
+- fix readme ee img
+
 ## 0.1.10
 
 ### Patch Changes

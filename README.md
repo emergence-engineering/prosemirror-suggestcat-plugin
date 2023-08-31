@@ -1,6 +1,6 @@
 # prosemirror-suggestcat-plugin
 
-![made by Emergence Engineering](https://emergence-engineering.com/ee-logo.svg)
+[![made by Emergence Engineering](https://emergence-engineering.com/ee-logo.svg)](https://emergence-engineering.com)
 
 [**Made by Emergence-Engineering**](https://emergence-engineering.com/)
 
@@ -172,17 +172,17 @@ view.dispatch(
 
 ```ts
 export enum TaskType {
-    Complete = "Complete",
-    Improve = "Improve",
-    MakeLonger = "MakeLonger",
-    MakeShorter = "MakeShorter",
-    Simplify = "Simplify",
-    Explain = "Explain",
-    ActionItems = "ActionItems",
+  Complete = "Complete",
+  Improve = "Improve",
+  MakeLonger = "MakeLonger",
+  MakeShorter = "MakeShorter",
+  Simplify = "Simplify",
+  Explain = "Explain",
+  ActionItems = "ActionItems",
 }
 export enum OpenAiPromptsWithParam {
-    ChangeTone = "ChangeTone",
-    Translate = "Translate",
+  ChangeTone = "ChangeTone",
+  Translate = "Translate",
 }
 
 export enum Status {
