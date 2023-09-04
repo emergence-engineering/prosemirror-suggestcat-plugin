@@ -22,7 +22,7 @@ const isJsonString = (str: string) => {
   return false;
 };
 
-const myApiRequest = async (
+export const request = async (
   apiKey: string,
   text: string,
 ): Promise<FixMistakeResultData> => {
@@ -87,7 +87,7 @@ export const createMakeRequest = (
       oldText,
       versionAtRequestStart.text,
     );
-    myApiRequest(apiKey, changedRegion.newText)
+    request(apiKey, changedRegion.newText)
       .then((fix) => {
         // Check if the document version has changed while we were waiting
         if (

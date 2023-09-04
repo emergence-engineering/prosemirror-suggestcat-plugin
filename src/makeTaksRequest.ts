@@ -11,7 +11,7 @@ import {
 } from "./types";
 import { completePluginKey } from "./utils";
 
-const request = async (
+export const request = async (
   apiKey: string,
   text: string,
   pluginState: CompletePluginState,

@@ -36,7 +36,10 @@ export const getTextWithNewlines = (node: Node) => {
   return text;
 };
 
-const getLastChangePos = (oldText: string, changes: [number, string][]) => {
+export const getLastChangePos = (
+  oldText: string,
+  changes: [number, string][],
+) => {
   const lastChange = changes[changes.length - 1];
   if (lastChange[0] !== diff.EQUAL) return oldText.length;
   const changesWithoutLast = changes.slice(0, changes.length - 1);

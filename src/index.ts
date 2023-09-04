@@ -1,18 +1,10 @@
 export { grammarSuggestPlugin } from "./plugin";
 export { defaultOptions, defaultCompleteOptions } from "./defaults";
-export { completePluginKey } from "./utils";
+export { completePluginKey, getChangedRegions } from "./utils";
 export { completePlugin } from "./completePlugin";
-export {
-  OpenAiPromptsWithParam,
-  OpenAiPromptsWithoutParam,
-  Status,
-  MoodParamType,
-  TranslationTargetLanguage,
-} from "./types";
-export type {
-  DefaultCompleteOptions,
-  TaskMeta,
-  CompletePluginState,
-  MoodParams,
-  TranslationParams,
-} from "./types";
+
+export * from "./types";
+
+export { request as completeRequest } from "./makeTaksRequest";
+export { request as suggescatRequest } from "./makeRequest";
+export { getDiff } from "./mergeDiffs";
