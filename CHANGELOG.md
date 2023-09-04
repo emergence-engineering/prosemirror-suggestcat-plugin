@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.12
+
+### Patch Changes
+
+- export request, utils, types
+
 ## 0.1.11
 
 ### Patch Changes
