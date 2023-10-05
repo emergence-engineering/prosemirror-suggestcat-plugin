@@ -1,5 +1,7 @@
 import debounce from "lodash.debounce";
 import { EditorView } from "prosemirror-view";
+import { docToTextWithMapping } from "@emergence-engineering/prosemirror-text-map";
+
 import {
   getChangedRegions,
   getTextWithNewlines,
@@ -11,7 +13,6 @@ import {
   GrammarSuggestPluginOptions,
   UpdateSuggestionMeta,
 } from "./types";
-import { docToTextWithMapping } from "./mapping";
 
 const isJsonString = (str: string) => {
   try {

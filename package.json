@@ -33,6 +33,8 @@
   },
   "homepage": "https://github.com/emergence-engineering/prosemirror-suggestcat-plugin#readme",
   "dependencies": {
+    "@emergence-engineering/fast-diff-merge": "^0.0.3",
+    "@emergence-engineering/prosemirror-text-map": "^0.0.3",
     "eslint": "^8.29.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.5.0",

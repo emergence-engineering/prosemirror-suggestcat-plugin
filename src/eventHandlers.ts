@@ -2,6 +2,11 @@ import { Decoration, DecorationSet, EditorView } from "prosemirror-view";
 import { EditorState, TextSelection, Transaction } from "prosemirror-state";
 import { Mapping, StepMap } from "prosemirror-transform";
 import { Fragment, Slice } from "prosemirror-model";
+import { getDiff, isIdentity } from "@emergence-engineering/fast-diff-merge";
+import {
+  docToTextWithMapping,
+  textPosToDocPos,
+} from "@emergence-engineering/prosemirror-text-map";
 
 import {
   AcceptSuggestionMeta,
@@ -20,8 +25,6 @@ import {
   getTextWithNewlines,
   grammarSuggestPluginKey,
 } from "./utils";
-import { getDiff, isIdentity } from "./mergeDiffs";
-import { docToTextWithMapping, textPosToDocPos } from "./mapping";
 
 export const handleUpdate = (
   pluginState: GrammarSuggestPluginState,
