@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.13
+
+### Patch Changes
+
+- upgrade fast-diff-merge and prosemirror-text-map
+
 ## 0.1.12
 
 ### Patch Changes
