@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.15
+
+### Patch Changes
+
+- fix apply remove suggestion
+
 ## 0.1.14
 
 ### Patch Changes
