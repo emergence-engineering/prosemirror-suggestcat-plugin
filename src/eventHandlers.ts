@@ -153,13 +153,16 @@ const applySuggestion = (view: EditorView, decoration: Decoration) => {
 
   const paragraphs = text.split("\n");
 
-  const paragraphNodes = paragraphs.map((paragraph) =>
-    view.state.schema.node(
+  const paragraphNodes = paragraphs.map((paragraph) => {
+    if (!paragraph) {
+      return view.state.schema.node("paragraph");
+    }
+    return view.state.schema.node(
       "paragraph",
       null,
-      view.state.schema.text(paragraph),
-    ),
-  );
+      view.state.schema.text(paragraph || ""),
+    );
+  });
 
   const fragment = Fragment.fromArray(paragraphNodes);
 

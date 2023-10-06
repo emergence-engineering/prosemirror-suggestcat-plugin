@@ -31,7 +31,6 @@ export const getTextWithNewlines = (doc: Node) => {
   let currentBlock = "";
   let firstBlockDone = false;
   doc.descendants((node, pos) => {
-    console.log({ node });
     if (node.type.isBlock) {
       if (!firstBlockDone) {
         firstBlockDone = true;
