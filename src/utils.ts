@@ -26,13 +26,24 @@ export const grammarSuggestPluginKey = new PluginKey<GrammarSuggestPluginState>(
   "grammarSuggestPlugin",
 );
 
-export const getTextWithNewlines = (node: Node) => {
+export const getTextWithNewlines = (doc: Node) => {
   let text = "";
-  node.descendants((n, pos) => {
-    if (n.isText) {
-      text += `${n.text}\n`;
+  let currentBlock = "";
+  let firstBlockDone = false;
+  doc.descendants((node, pos) => {
+    console.log({ node });
+    if (node.type.isBlock) {
+      if (!firstBlockDone) {
+        firstBlockDone = true;
+        return;
+      }
+      text += `${currentBlock}\n`;
+      currentBlock = "";
+    } else if (node.isText) {
+      currentBlock += `${node.text}`; // itt hianyzik a `\n`
     }
   });
+  text += currentBlock;
   return text;
 };
 
