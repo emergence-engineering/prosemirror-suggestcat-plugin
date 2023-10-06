@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 0.1.14
+
+### Patch Changes
+
+- getTextWithNewlines update
+
 ## 0.1.13
 
 ### Patch Changes
