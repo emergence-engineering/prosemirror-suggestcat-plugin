@@ -49,17 +49,15 @@ export const request = async (
       }
       return Promise.reject(response);
     })
-    .then((jsonData) => {
-      if (!jsonData || jsonData.some((i: string) => isJsonString(i))) {
+    .then((jsonData: string[]) => {
+      if (!jsonData?.length) {
         return {
           fixed: false,
           result: text,
         };
       }
       return {
-        result: jsonData
-          .map((data: string) => JSON.parse(data).result)
-          .join("\n"),
+        result: jsonData.join("\n"),
         fixed: true,
       } as FixMistakeResultData;
     })

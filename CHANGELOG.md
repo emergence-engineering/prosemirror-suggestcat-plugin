@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 1.0.0
+
+### Major Changes
+
+- 4280972: openai model change
+
 ## 0.1.15
 
 ### Patch Changes
