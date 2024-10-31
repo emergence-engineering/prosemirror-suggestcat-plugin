@@ -34,6 +34,7 @@ export const completePlugin = (
       },
       apply(tr, pluginState, prevState, state) {
         const meta = tr.getMeta(completePluginKey);
+        console.log("complatePluginMeta", { meta, pluginState, state });
 
         if (
           pluginState.status === Status.done ||
@@ -69,6 +70,7 @@ export const completePlugin = (
       return {
         update(view, prevState) {
           const pluginState = completePluginKey.getState(view.state);
+          console.log({ pluginState });
           /* eslint-disable prefer-destructuring */
           let tr = view.state.tr;
           if (pluginState?.status === Status.new && !streaming) {

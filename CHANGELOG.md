@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 1.1.1
+
+### Patch Changes
+
+- package upgrade
+
 ## 1.1.0
 
 ### Minor Changes
