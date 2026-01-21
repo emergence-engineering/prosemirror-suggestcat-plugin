@@ -12,8 +12,8 @@ import {
   getDecorationDetails,
   waitForDecorations,
   waitForMinUnitCountByStatus,
-} from "../helpers/test-utils";
-import { UnitStatus } from "../../src";
+} from "../../helpers/test-utils";
+import { UnitStatus } from "../../../src";
 
 test.describe("Self-Change Detection", () => {
   test.beforeEach(async ({ page }) => {

@@ -15,8 +15,8 @@ import {
   waitForUnitCountByStatus,
   waitForMinUnitCountByStatus,
   waitForMockPendingCount,
-} from "../helpers/test-utils";
-import { UnitStatus } from "../../src";
+} from "../../helpers/test-utils";
+import { UnitStatus } from "../../../src";
 
 test.describe("Editing While Processing", () => {
   test.beforeEach(async ({ page }) => {

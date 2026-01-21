@@ -19,7 +19,12 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "e2e:server": "vite --config e2e/vite.config.ts",
+    "test:e2e:blockRunner": "playwright test --project=blockRunner",
+    "test:e2e:completeV2": "playwright test --project=completeV2",
+    "test:e2e:grammarV2": "playwright test --project=grammarSuggestV2",
+    "e2e:server:blockRunner": "vite --config e2e/blockRunner/vite.config.ts",
+    "e2e:server:completeV2": "vite --config e2e/completeV2/vite.config.ts",
+    "e2e:server:grammarV2": "vite --config e2e/grammarSuggestV2/vite.config.ts",
     "upgrade-interactive": "npm-check --update",
     "publish:np": "np"
   },

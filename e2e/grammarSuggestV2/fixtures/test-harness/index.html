@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrammarSuggestV2 E2E Test Harness</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app">
+    <h1>GrammarSuggestV2 E2E Test Harness</h1>
+    <div id="status-display"></div>
+    <div id="editor"></div>
+  </div>
+
+  <!-- Initial content for the editor with intentional grammar errors -->
+  <div id="content" style="display: none;">
+    <p>This is a sentance with an error.</p>
+    <p>The quick brown fox jumps over the lazy dog.</p>
+    <p>She dont know what to do about it.</p>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

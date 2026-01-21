@@ -11,8 +11,8 @@ import {
   getPendingCount,
   waitForMinUnitCountByStatus,
   waitForMockPendingCount,
-} from "../helpers/test-utils";
-import { UnitStatus } from "../../src";
+} from "../../helpers/test-utils";
+import { UnitStatus } from "../../../src";
 
 test.describe("Error Handling", () => {
   test.beforeEach(async ({ page }) => {

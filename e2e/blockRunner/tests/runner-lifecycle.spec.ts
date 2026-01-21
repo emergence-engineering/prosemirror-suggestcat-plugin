@@ -14,8 +14,8 @@ import {
   waitForPendingCount,
   waitForDecorations,
   waitForUnitCountByStatus,
-} from "../helpers/test-utils";
-import { UnitStatus } from "../../src";
+} from "../../helpers/test-utils";
+import { UnitStatus } from "../../../src";
 
 test.describe("Runner Lifecycle", () => {
   test.beforeEach(async ({ page }) => {

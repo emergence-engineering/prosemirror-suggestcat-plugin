@@ -11,13 +11,13 @@ import {
   RunnerStatus,
   UnitStatus,
   dispatchAction,
-} from "../../../src/blockRunner";
+} from "../../../../src/blockRunner";
 import type {
   RunnerState,
   MetadataSpec,
   ProcessingUnit,
   ResultDecoration,
-} from "../../../src/blockRunner/types";
+} from "../../../../src/blockRunner/types";
 
 import {
   createMockProcessor,

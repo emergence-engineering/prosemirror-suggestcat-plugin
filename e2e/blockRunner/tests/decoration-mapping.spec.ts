@@ -23,8 +23,8 @@ import {
   waitForMinWidgetCount,
   resolveUnit,
   getPendingKeys,
-} from "../helpers/test-utils";
-import { UnitStatus } from "../../src";
+} from "../../helpers/test-utils";
+import { UnitStatus } from "../../../src";
 
 test.describe("Decoration Positioning", () => {
   test.beforeEach(async ({ page }) => {

@@ -9,7 +9,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@blockRunner": resolve(__dirname, "../src/blockRunner"),
+      "@blockRunner": resolve(__dirname, "../../src/blockRunner"),
     },
   },
   optimizeDeps: {

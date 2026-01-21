@@ -12,8 +12,8 @@ import {
   waitForPendingCount,
   waitForProcessingCalls,
   waitForUnitCountByStatus,
-} from "../helpers/test-utils";
-import { UnitStatus } from "../../src";
+} from "../../helpers/test-utils";
+import { UnitStatus } from "../../../src";
 
 test.describe("Concurrent Processing", () => {
   test.beforeEach(async ({ page }) => {
