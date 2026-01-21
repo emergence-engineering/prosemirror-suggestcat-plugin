@@ -1,4 +1,3 @@
-export { grammarSuggestPlugin } from "./plugin";
 export { defaultOptions, defaultCompleteOptions } from "./defaults";
 export {
   completePluginKey,
@@ -7,16 +6,24 @@ export {
   setGrammarSuggestEnabled,
   setCompleteEnabled,
 } from "./utils";
-export { completePlugin } from "./completePlugin";
 
 export * from "./types";
 
-export { request as completeRequest } from "./makeTaksRequest";
-export { request as suggescatRequest } from "./makeRequest";
 export { getDiff } from "@emergence-engineering/fast-diff-merge";
+
+// Centralized API module
+export * from "./api";
 
 // Block Runner exports
 export * from "./blockRunner";
 
 // Grammar Suggest V2 (uses blockRunner)
 export * from "./grammarSuggestV2";
+
+// Complete V2 (modular completion plugin)
+export * from "./completeV2";
+
+// Backward compatibility alias
+import { completePluginV2 } from "./completeV2";
+/** @deprecated Use completePluginV2 instead */
+export const completePlugin = completePluginV2;

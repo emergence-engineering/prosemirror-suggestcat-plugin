@@ -30,6 +30,8 @@ export interface GrammarUnitMetadata {
 // Plugin options
 export interface GrammarSuggestV2Options {
   apiKey: string;
+  apiEndpoint?: string;
+  model?: string;
   batchSize?: number; // Default: 2
   maxRetries?: number; // Default: 3
   backoffBase?: number; // Default: 2000

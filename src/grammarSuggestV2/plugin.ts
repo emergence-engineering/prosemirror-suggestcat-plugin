@@ -101,13 +101,19 @@ export function grammarSuggestPluginV2(
   options: Partial<GrammarSuggestV2Options> = {},
 ): Plugin<GrammarState> {
   const {
-    batchSize = 2,
+    apiEndpoint,
+    model,
+    batchSize = 4,
     maxRetries = 3,
     backoffBase = 2000,
     createPopup = defaultCreatePopup,
   } = options;
 
-  const processor = createGrammarProcessor(apiKey);
+  const processor = createGrammarProcessor({
+    apiKey,
+    apiEndpoint,
+    model,
+  });
 
   // Create the base block runner plugin
   const basePlugin = blockRunnerPlugin<

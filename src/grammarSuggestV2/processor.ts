@@ -1,7 +1,7 @@
 import { EditorView } from "prosemirror-view";
 import { getDiff, isIdentity } from "@emergence-engineering/fast-diff-merge";
 import { ProcessingUnit, UnitProcessorResult } from "../blockRunner/types";
-import { request } from "../makeRequest";
+import { grammarRequest } from "../api";
 import {
   GrammarFixResult,
   GrammarSuggestion,
@@ -26,15 +26,31 @@ function parseSuggestions(
     }));
 }
 
-// Create processor with API key
-export const createGrammarProcessor = (apiKey: string) => {
+export interface GrammarProcessorOptions {
+  apiKey: string;
+  apiEndpoint?: string;
+  model?: string;
+}
+
+// Create processor with API options
+export const createGrammarProcessor = (options: GrammarProcessorOptions | string) => {
+  // Support both old (string) and new (object) API
+  const { apiKey, apiEndpoint, model } = typeof options === "string"
+    ? { apiKey: options, apiEndpoint: undefined, model: undefined }
+    : options;
+
   return async (
     _view: EditorView,
     unit: ProcessingUnit<GrammarUnitMetadata>,
   ): Promise<UnitProcessorResult<GrammarFixResult>> => {
     try {
-      // Call the grammar API
-      const result = await request(apiKey, unit.text);
+      // Call the grammar API using centralized request
+      const result = await grammarRequest({
+        apiKey,
+        text: unit.text,
+        endpoint: apiEndpoint,
+        model,
+      });
 
       if (!result.fixed) {
         // No fixes needed

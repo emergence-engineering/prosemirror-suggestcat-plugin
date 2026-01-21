@@ -57,6 +57,7 @@ export function createRunnerOptions<
     dirtyHandling: overrides.dirtyHandling ?? {
       shouldRecalculate: true,
       debounceDelay: 300,
+      skipDirtyOnSelfChange: true,
     },
     defaultMetadataFactory: overrides.defaultMetadataFactory,
     forceRerender: overrides.forceRerender ?? (() => {}),

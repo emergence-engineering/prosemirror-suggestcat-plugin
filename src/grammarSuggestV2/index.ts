@@ -28,4 +28,4 @@ export {
 } from "./decorations";
 
 // Processor (for customization)
-export { createGrammarProcessor } from "./processor";
+export { createGrammarProcessor, type GrammarProcessorOptions } from "./processor";

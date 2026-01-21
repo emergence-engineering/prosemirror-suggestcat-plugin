@@ -132,7 +132,20 @@ export enum TranslationTargetLanguage {
 
 export type TranslationParams = { targetLanguage: TranslationTargetLanguage };
 export type MoodParams = { mood: MoodParamType };
-export enum OpenAiPromptsWithoutParam {
+
+export type HintParams = {
+  previousPromptType: string;
+  oldVersion: string;
+  newVersion: string;
+  language?: string;
+};
+
+export type CustomParams = {
+  systemPrompt: string;
+};
+
+// AI task types without additional parameters
+export enum AiPromptsWithoutParam {
   Complete = "Complete",
   Improve = "Improve",
   MakeLonger = "MakeLonger",
@@ -142,12 +155,28 @@ export enum OpenAiPromptsWithoutParam {
   ActionItems = "ActionItems",
 }
 
-export enum OpenAiPromptsWithParam {
+// AI task types that require additional parameters
+export enum AiPromptsWithParam {
   ChangeTone = "ChangeTone",
   Translate = "Translate",
+  Hint = "Hint",
+  Custom = "Custom",
 }
 
-export type TaskType = OpenAiPromptsWithoutParam | OpenAiPromptsWithParam;
+// Backward compatibility aliases
+/** @deprecated Use AiPromptsWithoutParam instead */
+export const OpenAiPromptsWithoutParam = AiPromptsWithoutParam;
+/** @deprecated Use AiPromptsWithParam instead */
+export const OpenAiPromptsWithParam = AiPromptsWithParam;
+
+export type TaskType = AiPromptsWithoutParam | AiPromptsWithParam;
+
+// Union type for all task parameters
+export type TaskParams =
+  | MoodParams
+  | TranslationParams
+  | HintParams
+  | CustomParams;
 
 export enum Status {
   idle = "idle",
@@ -163,7 +192,7 @@ export enum Status {
 
 export interface CompletePluginState {
   type?: TaskType;
-  params?: MoodParams | TranslationParams | undefined;
+  params?: TaskParams | undefined;
   status?: Status;
   result?: string;
   selection?: TextSelection;
