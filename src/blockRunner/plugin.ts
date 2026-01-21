@@ -7,8 +7,8 @@ import {
   ActionType,
   DecorationFactory,
   DecorationTransformer,
+  PartialRunnerOptions,
   ResultDecoration,
-  RunnerOptions,
   RunnerState,
   RunnerStatus,
   UnitProcessor,
@@ -37,7 +37,7 @@ export interface BlockRunnerPluginConfig<
   initialContextState: ContextState;
 
   // Options (partial, merged with defaults)
-  options?: Partial<RunnerOptions<ResponseType, ContextState, UnitMetadata>>;
+  options?: PartialRunnerOptions<ResponseType, ContextState, UnitMetadata>;
 
   // Optional keyboard handler
   handleKeyDown?: (
@@ -79,13 +79,19 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
       },
 
       apply(tr, state, oldEditorState, newEditorState): RunnerState<ResponseType, ContextState, UnitMetadata> {
+        // Handle dispatched actions - check for action first to detect self-calls
+        const action = tr.getMeta(pluginKey);
+
+        // Detect self-change: docChanged AND plugin meta present
+        const isSelfChange = tr.docChanged && action !== undefined;
+        const shouldSkipDirty = isSelfChange && mergedOptions.dirtyHandling.skipDirtyOnSelfChange;
+
         // Handle document changes - remap positions
         if (tr.docChanged) {
-          state = remapPositions(state, tr, oldEditorState, mergedOptions);
+          state = remapPositions(state, tr, oldEditorState, mergedOptions, shouldSkipDirty);
         }
 
         // Handle dispatched actions
-        const action = tr.getMeta(pluginKey);
         if (action) {
           const newPluginState = handleAction(
             state,

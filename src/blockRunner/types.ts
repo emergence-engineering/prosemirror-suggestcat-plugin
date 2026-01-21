@@ -92,10 +92,7 @@ export interface RunnerOptions<
   backoffBase: number; // Initial retry delay ms (default: 1000)
 
   // Dirty handling configuration
-  dirtyHandling: {
-    shouldRecalculate: boolean; // Reprocess on text change
-    debounceDelay: number; // Delay before reprocessing (ms)
-  };
+  dirtyHandling: DirtyHandlingOptions;
 
   // Metadata factory for new units (used when splits create new nodes)
   defaultMetadataFactory?: (range: UnitRange) => UnitMetadata;
@@ -106,6 +103,19 @@ export interface RunnerOptions<
     state: RunnerState<ResponseType, ContextState, UnitMetadata>,
   ) => void; // State change callback
 }
+
+// Dirty handling options - extracted for partial typing
+export interface DirtyHandlingOptions {
+  shouldRecalculate: boolean; // Reprocess on text change
+  debounceDelay: number; // Delay before reprocessing (ms)
+  skipDirtyOnSelfChange: boolean; // Skip dirty marking when plugin triggers doc change (default: true)
+}
+
+// Partial runner options - allows partial dirtyHandling
+export type PartialRunnerOptions<ResponseType, ContextState, UnitMetadata> =
+  Omit<Partial<RunnerOptions<ResponseType, ContextState, UnitMetadata>>, 'dirtyHandling'> & {
+    dirtyHandling?: Partial<DirtyHandlingOptions>;
+  };
 
 // Runner state when idle
 export interface RunnerStateIdle<

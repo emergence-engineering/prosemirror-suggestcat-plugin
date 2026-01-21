@@ -94,6 +94,7 @@ export function remapPositions<ResponseType, ContextState, UnitMetadata>(
   tr: Transaction,
   editorState: EditorState,
   options: RunnerOptions<ResponseType, ContextState, UnitMetadata>,
+  skipDirtyMarking: boolean = false,
 ): RunnerState<ResponseType, ContextState, UnitMetadata> {
   const fixedMappings = fixYjsMappings(tr, editorState);
   if (!fixedMappings) return state;
@@ -113,13 +114,15 @@ export function remapPositions<ResponseType, ContextState, UnitMetadata>(
       const refNode = helperNodes[idx];
       if (refNode) {
         let status = node.status;
-        if (refNode.from <= end && refNode.to >= start) {
+        // Only mark as DIRTY if not skipping dirty marking (i.e., not a self-change)
+        if (!skipDirtyMarking && refNode.from <= end && refNode.to >= start) {
           status = UnitStatus.DIRTY;
         }
         newNodes.push({
           ...node,
           status,
-          waitUntil,
+          // Only update waitUntil if we're marking dirty
+          waitUntil: skipDirtyMarking ? node.waitUntil : waitUntil,
           ...refNode,
         });
       } else {

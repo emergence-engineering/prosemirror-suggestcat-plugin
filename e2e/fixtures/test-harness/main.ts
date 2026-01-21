@@ -183,6 +183,7 @@ interface TestBridge {
     insertTextAt: (pos: number, text: string) => void;
     deleteRange: (from: number, to: number) => void;
     focus: () => void;
+    performSelfCall: (from: number, to: number, replacement: string, actionType: string, actionPayload: object) => void;
   };
 
   // Async helpers
@@ -327,6 +328,24 @@ function createTestBridge(view: EditorView): TestBridge {
       },
       focus: () => {
         view.focus();
+      },
+      performSelfCall: (from: number, to: number, replacement: string, actionType: string, actionPayload: object) => {
+        // Create a transaction that includes both a text change and a plugin meta
+        // This simulates what acceptSuggestion does
+        let tr = view.state.tr;
+
+        // Replace text (or insert if from === to)
+        if (from === to) {
+          tr = tr.insertText(replacement, from);
+        } else {
+          tr = tr.insertText(replacement, from, to);
+        }
+
+        // Add the plugin action meta
+        const action = { type: ActionType[actionType as keyof typeof ActionType], ...actionPayload };
+        tr = tr.setMeta(testPluginKey, action);
+
+        view.dispatch(tr);
       },
     },
 

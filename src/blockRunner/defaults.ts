@@ -1,4 +1,9 @@
-import { ProcessingUnit, ResultDecoration, RunnerOptions } from "./types";
+import {
+  PartialRunnerOptions,
+  ProcessingUnit,
+  ResultDecoration,
+  RunnerOptions,
+} from "./types";
 
 // Default runner options
 export const defaultRunnerOptions: RunnerOptions = {
@@ -23,6 +28,7 @@ export const defaultRunnerOptions: RunnerOptions = {
   dirtyHandling: {
     shouldRecalculate: true,
     debounceDelay: 300,
+    skipDirtyOnSelfChange: true,
   },
 
   // UI callbacks (noop by default)
@@ -36,7 +42,7 @@ export function mergeOptions<
   ContextState = unknown,
   UnitMetadata = unknown,
 >(
-  options: Partial<RunnerOptions<ResponseType, ContextState, UnitMetadata>>,
+  options: PartialRunnerOptions<ResponseType, ContextState, UnitMetadata>,
 ): RunnerOptions<ResponseType, ContextState, UnitMetadata> {
   return {
     ...defaultRunnerOptions,
