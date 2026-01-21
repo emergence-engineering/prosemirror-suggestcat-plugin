@@ -93,3 +93,6 @@ thumb
 sketch
 
 *.tgz
+
+test-results
+playwright-report

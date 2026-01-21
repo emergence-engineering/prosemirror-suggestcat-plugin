@@ -38,12 +38,22 @@ export const grammarSuggestPlugin = (
           lastText: "",
           decorations: DecorationSet.empty,
           popupDecoration: DecorationSet.empty,
+          enabled: true,
         };
       },
       apply(tr, pluginState, oldState, newState) {
         const meta: GrammarPluginMeta | undefined = tr.getMeta(
           grammarSuggestPluginKey,
         );
+        if (meta?.type === GrammarSuggestMetaType.setEnabled) {
+          return {
+            ...pluginState,
+            enabled: meta.enabled,
+            // Clear decorations when disabling
+            decorations: meta.enabled ? pluginState.decorations : DecorationSet.empty,
+            popupDecoration: meta.enabled ? pluginState.popupDecoration : DecorationSet.empty,
+          };
+        }
         if (meta?.type === GrammarSuggestMetaType.suggestionUpdate) {
           return handleUpdate(pluginState, meta, tr);
         }
@@ -85,6 +95,8 @@ export const grammarSuggestPlugin = (
       return {
         update(view, prevState) {
           const pluginState = grammarSuggestPluginKey.getState(view.state);
+          // Skip if plugin is disabled
+          if (!pluginState?.enabled) return;
           // When editor state changes, check if the version changed
           if (
             (view.state.doc.textBetween(

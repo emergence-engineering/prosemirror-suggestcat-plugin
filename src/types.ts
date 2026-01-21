@@ -21,6 +21,7 @@ export type GrammarSuggestPluginState = {
   decorations: DecorationSet;
   popupDecoration: DecorationSet;
   currentSuggestionId?: object;
+  enabled: boolean;
 };
 export type GrammarSuggestPluginOptions = {
   debounceMs: number;
@@ -40,6 +41,7 @@ export enum GrammarSuggestMetaType {
   openSuggestion = "openSuggestion",
   closeSuggestion = "closeSuggestion",
   discardSuggestion = "discardSuggestion",
+  setEnabled = "setEnabled",
 }
 
 export interface AcceptSuggestionMeta {
@@ -80,12 +82,18 @@ export interface CloseSuggestionMeta {
   type: GrammarSuggestMetaType.closeSuggestion;
 }
 
+export interface SetEnabledMeta {
+  type: GrammarSuggestMetaType.setEnabled;
+  enabled: boolean;
+}
+
 export type GrammarPluginMeta =
   | UpdateSuggestionMeta
   | AcceptSuggestionMeta
   | OpenSuggestionMeta
   | CloseSuggestionMeta
-  | DiscardSuggestionMeta;
+  | DiscardSuggestionMeta
+  | SetEnabledMeta;
 
 export type GrammarSuggestDecorationSpec = {
   originalText: string;
@@ -161,6 +169,7 @@ export interface CompletePluginState {
   selection?: TextSelection;
   error?: string;
   isCancelled?: boolean;
+  enabled: boolean;
 }
 
 export interface TaskMeta {

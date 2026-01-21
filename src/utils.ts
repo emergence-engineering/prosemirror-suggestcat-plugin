@@ -1,10 +1,12 @@
 import { PluginKey } from "prosemirror-state";
 import { Node } from "prosemirror-model";
+import { EditorView } from "prosemirror-view";
 import diff from "fast-diff";
 
 import {
   ChangedRegion,
   CompletePluginState,
+  GrammarSuggestMetaType,
   GrammarSuggestPluginState,
   OpenAiPromptsWithoutParam,
   OpenAiPromptsWithParam,
@@ -25,6 +27,26 @@ export const isCompleteMeta = (meta: any): meta is TaskMeta => {
 export const grammarSuggestPluginKey = new PluginKey<GrammarSuggestPluginState>(
   "grammarSuggestPlugin",
 );
+
+// Helper to toggle grammar suggest plugin
+export const setGrammarSuggestEnabled = (view: EditorView, enabled: boolean) => {
+  view.dispatch(
+    view.state.tr.setMeta(grammarSuggestPluginKey, {
+      type: GrammarSuggestMetaType.setEnabled,
+      enabled,
+    }),
+  );
+};
+
+// Helper to toggle complete plugin
+export const setCompleteEnabled = (view: EditorView, enabled: boolean) => {
+  view.dispatch(
+    view.state.tr.setMeta(completePluginKey, {
+      type: "setEnabled",
+      enabled,
+    }),
+  );
+};
 
 export const getTextWithNewlines = (doc: Node) => {
   let text = "";

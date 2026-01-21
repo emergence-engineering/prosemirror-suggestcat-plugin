@@ -30,18 +30,23 @@ export const completePlugin = (
     key: completePluginKey,
     state: {
       init() {
-        return { status: Status.idle };
+        return { status: Status.idle, enabled: true };
       },
       apply(tr, pluginState, prevState, state) {
         const meta = tr.getMeta(completePluginKey);
         console.log("complatePluginMeta", { meta, pluginState, state });
+
+        // Handle setEnabled
+        if (meta?.type === "setEnabled") {
+          return { ...pluginState, enabled: meta.enabled };
+        }
 
         if (
           pluginState.status === Status.done ||
           pluginState.status === Status.rejected
         ) {
           streaming = false;
-          return { status: Status.idle };
+          return { ...pluginState, status: Status.idle };
         }
 
         if (meta?.status === Status.cancelled) {
@@ -71,6 +76,8 @@ export const completePlugin = (
         update(view, prevState) {
           const pluginState = completePluginKey.getState(view.state);
           console.log({ pluginState });
+          // Skip if plugin is disabled
+          if (!pluginState?.enabled) return;
           /* eslint-disable prefer-destructuring */
           let tr = view.state.tr;
           if (pluginState?.status === Status.new && !streaming) {
