@@ -4,8 +4,6 @@ import { TextSelection } from "prosemirror-state";
 export {
   AiPromptsWithoutParam,
   AiPromptsWithParam,
-  OpenAiPromptsWithoutParam,
-  OpenAiPromptsWithParam,
   MoodParamType,
   TranslationTargetLanguage,
   type MoodParams,

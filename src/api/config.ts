@@ -10,6 +10,12 @@ export const DEFAULT_GRAMMAR_ENDPOINT =
 
 // Default model to use
 export const DEFAULT_MODEL = "openai:gpt-4o-mini";
+export type AIModel =
+  | "openai:gpt-4o"
+  | "openai:gpt-4o-mini"
+  | "cerebras:llama-3.1-8b"
+  | "cerebras:llama-3.3-70b"
+  | "cerebras:qwen-3-32b";
 
 // Create a complete API config with defaults
 export function createApiConfig(config: ApiConfig): Required<ApiConfig> {

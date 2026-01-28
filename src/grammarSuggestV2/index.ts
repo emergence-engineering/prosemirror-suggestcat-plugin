@@ -18,6 +18,7 @@ export {
   selectSuggestion,
   deselectSuggestion,
   getSelectedDecoration,
+  requestHint,
 } from "./actions";
 
 // Decorations (for customization)

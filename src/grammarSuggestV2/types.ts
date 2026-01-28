@@ -1,5 +1,6 @@
 import { EditorView } from "prosemirror-view";
 import { Decoration } from "prosemirror-view";
+import { AIModel } from "../api/config";
 
 // Single grammar suggestion within a paragraph
 export interface GrammarSuggestion {
@@ -31,16 +32,18 @@ export interface GrammarUnitMetadata {
 export interface GrammarSuggestV2Options {
   apiKey: string;
   apiEndpoint?: string;
-  model?: string;
+  model?: string | AIModel;
   batchSize?: number; // Default: 2
   maxRetries?: number; // Default: 3
   backoffBase?: number; // Default: 2000
+  debounceMs?: number; // Default: 1000
   createPopup?: (
     view: EditorView,
     decoration: Decoration,
     pos: number,
     applySuggestion: () => void,
     discardSuggestion: () => void,
+    requestHint: () => Promise<string>,
   ) => HTMLElement;
 }
 

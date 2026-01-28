@@ -23,6 +23,9 @@ export * from "./grammarSuggestV2";
 // Complete V2 (modular completion plugin)
 export * from "./completeV2";
 
+// Auto-complete (inline ghost text completions)
+export * from "./autoComplete";
+
 // Backward compatibility alias
 import { completePluginV2 } from "./completeV2";
 /** @deprecated Use completePluginV2 instead */

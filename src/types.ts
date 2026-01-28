@@ -147,6 +147,7 @@ export type CustomParams = {
 // AI task types without additional parameters
 export enum AiPromptsWithoutParam {
   Complete = "Complete",
+  SmallComplete = "SmallComplete",
   Improve = "Improve",
   MakeLonger = "MakeLonger",
   MakeShorter = "MakeShorter",

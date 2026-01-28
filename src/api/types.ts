@@ -1,10 +1,11 @@
 import type { TaskType, TaskParams } from "../types";
+import { AIModel } from "./config";
 
 // API configuration interface
 export interface ApiConfig {
   apiKey: string;
   endpoint?: string;
-  model?: string;
+  model?: string | AIModel;
 }
 
 // Request body for AI tasks

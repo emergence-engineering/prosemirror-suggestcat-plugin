@@ -23,6 +23,7 @@ import {
   deselectSuggestion,
   discardSuggestion,
   selectSuggestion,
+  requestHint,
 } from "./actions";
 
 type GrammarState = RunnerState<
@@ -45,15 +46,20 @@ export const grammarSuggestV2Key = createBlockRunnerKey<
 
 // Default popup creator - simple div with buttons
 const defaultCreatePopup = (
-  view: EditorView,
+  _view: EditorView,
   decoration: Decoration,
   _pos: number,
   applySuggestion: () => void,
   discardSuggestion: () => void,
+  onRequestHint: () => Promise<string>,
 ): HTMLElement => {
   const spec = decoration.spec as GrammarDecorationSpec;
   const popup = document.createElement("div");
   popup.className = "grammarPopupV2";
+
+  // Main row container for text and buttons
+  const mainRow = document.createElement("div");
+  mainRow.className = "grammarPopupV2-mainRow";
 
   const original = document.createElement("span");
   original.className = "grammarPopupV2-original";
@@ -67,6 +73,49 @@ const defaultCreatePopup = (
   replacement.className = "grammarPopupV2-replacement";
   replacement.textContent =
     spec.replacement === "" ? "(remove)" : `"${spec.replacement}"`;
+
+  // Hint button
+  const hintBtn = document.createElement("button");
+  hintBtn.className = "grammarPopupV2-hint";
+  hintBtn.textContent = "?";
+  hintBtn.title = "Why this suggestion?";
+
+  // Hint display area (initially hidden)
+  const hintArea = document.createElement("div");
+  hintArea.className = "grammarPopupV2-hintArea";
+  hintArea.style.display = "none";
+
+  let hintLoaded = false;
+
+  hintBtn.onclick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Toggle hint area visibility
+    if (hintArea.style.display === "none") {
+      hintArea.style.display = "block";
+
+      // Load hint if not already loaded
+      if (!hintLoaded) {
+        hintArea.innerHTML = '<span class="grammarPopupV2-loading">Loading...</span>';
+
+        try {
+          const hint = await onRequestHint();
+          hintArea.innerHTML = "";
+          const hintText = document.createElement("span");
+          hintText.className = "grammarPopupV2-hintText";
+          hintText.textContent = hint;
+          hintArea.appendChild(hintText);
+          hintLoaded = true;
+        } catch {
+          hintArea.innerHTML =
+            '<span class="grammarPopupV2-hintError">Could not load hint</span>';
+        }
+      }
+    } else {
+      hintArea.style.display = "none";
+    }
+  };
 
   const acceptBtn = document.createElement("button");
   acceptBtn.className = "grammarPopupV2-accept";
@@ -86,11 +135,15 @@ const defaultCreatePopup = (
     discardSuggestion();
   };
 
-  popup.appendChild(original);
-  popup.appendChild(arrow);
-  popup.appendChild(replacement);
-  popup.appendChild(acceptBtn);
-  popup.appendChild(discardBtn);
+  mainRow.appendChild(original);
+  mainRow.appendChild(arrow);
+  mainRow.appendChild(replacement);
+  mainRow.appendChild(hintBtn);
+  mainRow.appendChild(acceptBtn);
+  mainRow.appendChild(discardBtn);
+
+  popup.appendChild(mainRow);
+  popup.appendChild(hintArea);
 
   return popup;
 };
@@ -106,6 +159,7 @@ export function grammarSuggestPluginV2(
     batchSize = 4,
     maxRetries = 3,
     backoffBase = 2000,
+    debounceMs = 1000,
     createPopup = defaultCreatePopup,
   } = options;
 
@@ -131,6 +185,9 @@ export function grammarSuggestPluginV2(
       batchSize,
       maxRetries,
       backoffBase,
+      dirtyHandling: {
+        debounceDelay: debounceMs,
+      },
     },
   });
 
@@ -166,6 +223,7 @@ export function grammarSuggestPluginV2(
         }
 
         // Add popup widget for selected decoration
+        const spec = selectedDecoration.spec as unknown as GrammarDecorationSpec;
         const popupWidget = Decoration.widget(
           selectedDecoration.from,
           (view, getPos) => {
@@ -178,6 +236,7 @@ export function grammarSuggestPluginV2(
               pos,
               () => acceptSuggestion(view, grammarSuggestV2Key, selectedDecoration.spec.id),
               () => discardSuggestion(view, grammarSuggestV2Key, selectedDecoration.spec.id),
+              () => requestHint(apiKey, spec.originalText, spec.replacement, { endpoint: apiEndpoint, model: model as string }),
             );
           },
           { id: selectedDecoration.spec.id, side: -1, stopEvent: () => true },

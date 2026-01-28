@@ -18,8 +18,6 @@ export {
   // Re-exported from main types
   AiPromptsWithoutParam,
   AiPromptsWithParam,
-  OpenAiPromptsWithoutParam,
-  OpenAiPromptsWithParam,
   MoodParamType,
   TranslationTargetLanguage,
   type MoodParams,

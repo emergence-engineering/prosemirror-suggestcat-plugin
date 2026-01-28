@@ -8,6 +8,9 @@ import {
   GrammarFixResult,
   GrammarUnitMetadata,
 } from "./types";
+import { streamingRequest } from "../api/streaming";
+import { AiPromptsWithParam, HintParams } from "../types";
+import { DEFAULT_COMPLETION_ENDPOINT, DEFAULT_MODEL } from "../api/config";
 
 type GrammarState = RunnerState<
   GrammarFixResult,
@@ -119,4 +122,45 @@ export function getSelectedDecoration(
     pluginKey,
     state.contextState.selectedSuggestionId,
   );
+}
+
+// Request a hint explaining why the grammar correction is suggested
+export async function requestHint(
+  apiKey: string,
+  originalText: string,
+  replacement: string,
+  options?: { endpoint?: string; model?: string },
+): Promise<string> {
+  const endpoint = options?.endpoint ?? DEFAULT_COMPLETION_ENDPOINT;
+  const model = options?.model ?? DEFAULT_MODEL;
+
+  return new Promise((resolve, reject) => {
+    const params: HintParams = {
+      previousPromptType: "Grammar",
+      oldVersion: originalText,
+      newVersion: replacement,
+    };
+
+    streamingRequest(
+      {
+        apiKey,
+        text: originalText,
+        task: AiPromptsWithParam.Hint,
+        params,
+        endpoint,
+        model,
+      },
+      {
+        onChunk: () => {
+          // Streaming chunks - no action needed for hint
+        },
+        onComplete: (result) => {
+          resolve(result);
+        },
+        onError: (error) => {
+          reject(error);
+        },
+      },
+    );
+  });
 }
