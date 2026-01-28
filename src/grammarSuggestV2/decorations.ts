@@ -9,12 +9,7 @@ import {
   WidgetFactory,
 } from "../blockRunner/types";
 import { textToDocPos } from "../blockRunner/utils";
-import {
-  GrammarContextState,
-  GrammarDecorationSpec,
-  GrammarFixResult,
-  GrammarUnitMetadata,
-} from "./types";
+import { GrammarContextState, GrammarDecorationSpec, GrammarFixResult, GrammarUnitMetadata, } from "./types";
 
 // Decoration factory - creates decorations for each suggestion
 export const grammarDecorationFactory: DecorationFactory<
@@ -90,21 +85,26 @@ export const grammarWidgetFactory: WidgetFactory<GrammarUnitMetadata> = (
 
   switch (unit.status) {
     case UnitStatus.QUEUED:
-      content = "⏳ Waiting...";
+    case UnitStatus.WAITING:
+      content = "⏳";
       className = "grammarWidgetV2 queued";
       break;
     case UnitStatus.PROCESSING:
-      content = "🔍 Checking...";
+      content = "🔍";
       className = "grammarWidgetV2 processing";
       break;
     case UnitStatus.BACKOFF:
       const waitTime = Math.max(0, unit.waitUntil - Date.now());
-      content = `🔄 Retry in ${Math.ceil(waitTime / 1000)}s`;
+      content = `🔄 ${Math.ceil(waitTime / 1000)}s`;
       className = "grammarWidgetV2 backoff";
       break;
     case UnitStatus.ERROR:
-      content = `❌ Check failed`;
+      content = "❌";
       className = "grammarWidgetV2 error";
+      break;
+    case UnitStatus.DIRTY:
+      content = "✏️";
+      className = "grammarWidgetV2 dirty";
       break;
     default:
       return undefined;
@@ -114,5 +114,7 @@ export const grammarWidgetFactory: WidgetFactory<GrammarUnitMetadata> = (
   widget.className = className;
   widget.textContent = content;
 
+  // Place at unit.from + 1 to be inside the paragraph (not before it)
+  // This ensures the widget is a child of the <p>, allowing absolute positioning relative to it
   return Decoration.widget(unit.from + 1, widget, { side: -1 });
 };
