@@ -74,7 +74,7 @@ export async function streamingRequest({
             view.dispatch(
               view.state.tr.setMeta(pluginKey, {
                 type: AutoCompleteActionType.STREAM_UPDATE,
-                suggestion: accumulated,
+                suggestion: ensureLeadingSpace(view, accumulated),
               }),
             );
           }
@@ -84,7 +84,7 @@ export async function streamingRequest({
             view.dispatch(
               view.state.tr.setMeta(pluginKey, {
                 type: AutoCompleteActionType.STREAM_COMPLETE,
-                suggestion: result,
+                suggestion: ensureLeadingSpace(view, result),
               }),
             );
           }
@@ -123,4 +123,73 @@ export function extractContext(view: EditorView, maxLength: number): string {
   }
 
   return fullText;
+}
+
+/**
+ * Ensure proper spacing between existing text and suggestion.
+ *
+ * If the last character before cursor is not a space/hyphen, and the first
+ * character of the suggestion is not a space/hyphen, prepend a space.
+ */
+export function ensureLeadingSpace(view: EditorView, suggestion: string): string {
+  if (!suggestion) {
+    return suggestion;
+  }
+
+  const { doc, selection } = view.state;
+  const cursorPos = selection.from;
+
+  // Get the character before cursor
+  if (cursorPos <= 0) {
+    return suggestion;
+  }
+
+  const charBefore = doc.textBetween(cursorPos - 1, cursorPos, "");
+  const firstCharOfSuggestion = suggestion.charAt(0);
+
+  const spacingChars = /[\s\-]/;
+  const needsSpace =
+    !spacingChars.test(charBefore) && !spacingChars.test(firstCharOfSuggestion);
+
+  return needsSpace ? " " + suggestion : suggestion;
+}
+
+/**
+ * Check if autoComplete should trigger based on sentence state and cursor position.
+ *
+ * Returns true only when:
+ * 1. The cursor is at the end of the current node
+ * 2. The text before cursor does NOT end with sentence-ending punctuation (. ! ?)
+ */
+export function shouldTriggerAutoComplete(view: EditorView): boolean {
+  const { doc, selection } = view.state;
+  const cursorPos = selection.from;
+
+  // Get the resolved position to find the current node
+  const $pos = doc.resolve(cursorPos);
+  const node = $pos.parent;
+
+  // Get cursor offset within the node
+  const nodeStart = $pos.start();
+  const nodeEnd = nodeStart + node.content.size;
+
+  // Check 1: Is cursor at the end of the node?
+  const isAtNodeEnd = cursorPos === nodeEnd;
+  if (!isAtNodeEnd) {
+    return false;
+  }
+
+  // Check 2: Get text before cursor in this node
+  const textBeforeCursor = node.textBetween(0, cursorPos - nodeStart, "");
+
+  // Empty or whitespace-only text should not trigger
+  if (!textBeforeCursor.trim()) {
+    return false;
+  }
+
+  // Check if sentence is incomplete (doesn't end with sentence-ending punctuation)
+  const sentenceEndRegex = /[.!?]\s*$/;
+  const isSentenceComplete = sentenceEndRegex.test(textBeforeCursor);
+
+  return !isSentenceComplete;
 }

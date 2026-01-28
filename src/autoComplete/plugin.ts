@@ -20,6 +20,7 @@ import {
   streamingRequest,
   extractContext,
   cancelActiveRequest,
+  shouldTriggerAutoComplete,
 } from "./streaming";
 
 // Plugin key for accessing state
@@ -387,6 +388,16 @@ export function autoCompletePlugin(
             pluginState.status === AutoCompleteStatus.PENDING &&
             !isRequestInFlight
           ) {
+            // Check if we should trigger autoComplete based on cursor position and sentence state
+            if (!shouldTriggerAutoComplete(view)) {
+              view.dispatch(
+                view.state.tr.setMeta(autoCompleteKey, {
+                  type: AutoCompleteActionType.DISMISS,
+                }),
+              );
+              return;
+            }
+
             const context = extractContext(view, maxContextLength);
 
             if (!context.trim()) {
