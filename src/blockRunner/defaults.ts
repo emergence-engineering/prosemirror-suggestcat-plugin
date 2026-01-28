@@ -27,7 +27,7 @@ export const defaultRunnerOptions: RunnerOptions = {
   // Dirty handling
   dirtyHandling: {
     shouldRecalculate: true,
-    debounceDelay: 300,
+    debounceDelay: 2000,
     skipDirtyOnSelfChange: true,
   },
 

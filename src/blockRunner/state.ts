@@ -80,6 +80,19 @@ function handleUnitSuccess<ResponseType, ContextState, UnitMetadata>(
 ): RunnerStateActive<ResponseType, ContextState, UnitMetadata> {
   const unit = state.unitsInProgress.find((u) => u.id === action.unitId);
   if (!unit) return state;
+  const waitUntil = Date.now() + state.options.dirtyHandling.debounceDelay;
+
+  // Check if text changed since request started (stale response)
+  const isStale = unit.requestText !== undefined && unit.requestText !== unit.text;
+
+  if (isStale) {
+    // Response is stale - mark DIRTY to trigger reprocessing
+    return updateUnit(state, action.unitId, {
+      status: UnitStatus.DIRTY,
+      requestText: undefined,
+      waitUntil: waitUntil,
+    });
+  }
 
   // Create decorations from response
   const newDecorations = decorationFactory(action.response, unit);
@@ -88,6 +101,7 @@ function handleUnitSuccess<ResponseType, ContextState, UnitMetadata>(
   const updatedState = updateUnit(state, action.unitId, {
     status: UnitStatus.DONE,
     response: action.response,
+    requestText: undefined,
   });
 
   return {
@@ -103,6 +117,18 @@ function handleUnitError<ResponseType, ContextState, UnitMetadata>(
 ): RunnerStateActive<ResponseType, ContextState, UnitMetadata> {
   const unit = state.unitsInProgress.find((u) => u.id === action.unitId);
   if (!unit) return state;
+  const waitUntil = Date.now() + state.options.dirtyHandling.debounceDelay;
+
+  // Check if text changed since request started (stale error)
+  const isStale = unit.requestText !== undefined && unit.requestText !== unit.text;
+  if (isStale) {
+    // Response is stale - mark DIRTY to trigger reprocessing instead of retrying stale request
+    return updateUnit(state, action.unitId, {
+      status: UnitStatus.DIRTY,
+      requestText: undefined,
+      waitUntil: waitUntil,
+    });
+  }
 
   const newRetryCount = unit.retryCount + 1;
 
@@ -111,6 +137,7 @@ function handleUnitError<ResponseType, ContextState, UnitMetadata>(
     return updateUnit(state, action.unitId, {
       status: UnitStatus.ERROR,
       retryCount: newRetryCount,
+      requestText: undefined,
     });
   }
 
@@ -119,6 +146,7 @@ function handleUnitError<ResponseType, ContextState, UnitMetadata>(
     status: UnitStatus.BACKOFF,
     retryCount: newRetryCount,
     waitUntil: Date.now() + calculateBackoff(newRetryCount, state.options.backoffBase),
+    requestText: undefined,
   });
 }
 
@@ -127,8 +155,12 @@ function handleUnitStarted<ResponseType, ContextState, UnitMetadata>(
   state: RunnerStateActive<ResponseType, ContextState, UnitMetadata>,
   unitId: object,
 ): RunnerStateActive<ResponseType, ContextState, UnitMetadata> {
+  const unit = state.unitsInProgress.find((u) => u.id === unitId);
+  if (!unit) return state;
+
   return updateUnit(state, unitId, {
     status: UnitStatus.PROCESSING,
+    requestText: unit.text, // Capture text being processed for staleness detection
   });
 }
 

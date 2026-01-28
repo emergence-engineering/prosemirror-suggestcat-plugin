@@ -30,6 +30,7 @@ export function createProcessingUnit<UnitMetadata = TestMetadata>(
     from: overrides.from ?? 0,
     to: overrides.to ?? 10,
     text: overrides.text ?? "test text",
+    requestText: overrides.requestText,
     mapping: overrides.mapping ?? [{ from: 0, docPos: 1 }],
     metadata: overrides.metadata ?? ({ label: "test" } as UnitMetadata),
     retryCount: overrides.retryCount ?? 0,

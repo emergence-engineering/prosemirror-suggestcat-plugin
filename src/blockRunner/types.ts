@@ -45,6 +45,7 @@ export interface ProcessingUnit<UnitMetadata = unknown> {
   from: number; // Start position in document
   to: number; // End position in document
   text: string; // Text content to process
+  requestText?: string; // Text sent to API (set when PROCESSING starts)
   mapping: BlockRunnerTextMapping[]; // Maps text positions to doc positions
   metadata: UnitMetadata; // Custom data per implementation
   retryCount: number; // Failed attempts

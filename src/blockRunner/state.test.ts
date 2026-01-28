@@ -68,6 +68,26 @@ describe("handleAction", () => {
       }
     });
 
+    it("captures requestText when processing starts", () => {
+      const unitId = {};
+      const units = [createProcessingUnit({ id: unitId, status: UnitStatus.QUEUED, text: "original text" })];
+      const state = createActiveState<TestResponse, TestContext, TestMetadata>({
+        unitsInProgress: units,
+      });
+
+      const newState = handleAction(
+        state,
+        { type: ActionType.UNIT_STARTED, unitId },
+        mockDecorationFactory,
+        mockEditorState,
+      );
+
+      expect(newState.status).toBe(RunnerStatus.ACTIVE);
+      if (newState.status === RunnerStatus.ACTIVE) {
+        expect(newState.unitsInProgress[0].requestText).toBe("original text");
+      }
+    });
+
     it("returns unchanged state if IDLE", () => {
       const state = createIdleState<TestResponse, TestContext, TestMetadata>();
       const unitId = {};
@@ -107,6 +127,83 @@ describe("handleAction", () => {
         expect(newState.unitsInProgress[0].status).toBe(UnitStatus.DONE);
         expect(newState.unitsInProgress[0].response).toBe(response);
         expect(newState.decorations.length).toBe(1);
+      }
+    });
+
+    it("creates decorations when text unchanged (fresh response)", () => {
+      const unitId = {};
+      const units = [
+        createProcessingUnit({
+          id: unitId,
+          status: UnitStatus.PROCESSING,
+          from: 0,
+          to: 10,
+          text: "same text",
+          requestText: "same text",
+        }),
+      ];
+      const state = createActiveState<TestResponse, TestContext, TestMetadata>({
+        unitsInProgress: units,
+        decorations: [],
+      });
+
+      const response: TestResponse = { result: "success" };
+      const newState = handleAction(
+        state,
+        { type: ActionType.UNIT_SUCCESS, unitId, response },
+        mockDecorationFactory,
+        mockEditorState,
+      );
+
+      expect(newState.status).toBe(RunnerStatus.ACTIVE);
+      if (newState.status === RunnerStatus.ACTIVE) {
+        expect(newState.unitsInProgress[0].status).toBe(UnitStatus.DONE);
+        expect(newState.decorations.length).toBe(1);
+        expect(newState.unitsInProgress[0].requestText).toBeUndefined();
+      }
+    });
+
+    it("marks DIRTY and skips decorations when text changed (stale response)", () => {
+      const restoreDate = mockDateNow(1000);
+      try {
+        const unitId = {};
+        const debounceDelay = 300;
+        const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
+          dirtyHandling: { shouldRecalculate: true, debounceDelay, skipDirtyOnSelfChange: true },
+        });
+        const units = [
+          createProcessingUnit({
+            id: unitId,
+            status: UnitStatus.PROCESSING,
+            from: 0,
+            to: 15,
+            text: "modified text",
+            requestText: "original text",
+          }),
+        ];
+        const state = createActiveState<TestResponse, TestContext, TestMetadata>({
+          unitsInProgress: units,
+          decorations: [],
+          options,
+        });
+
+        const response: TestResponse = { result: "stale result" };
+        const newState = handleAction(
+          state,
+          { type: ActionType.UNIT_SUCCESS, unitId, response },
+          mockDecorationFactory,
+          mockEditorState,
+        );
+
+        expect(newState.status).toBe(RunnerStatus.ACTIVE);
+        if (newState.status === RunnerStatus.ACTIVE) {
+          expect(newState.unitsInProgress[0].status).toBe(UnitStatus.DIRTY);
+          expect(newState.decorations.length).toBe(0);
+          expect(newState.unitsInProgress[0].requestText).toBeUndefined();
+          expect(newState.unitsInProgress[0].waitUntil).toBe(1000 + debounceDelay);
+        }
+      } finally {
+        restoreDate();
       }
     });
 
@@ -184,6 +281,48 @@ describe("handleAction", () => {
       if (newState.status === RunnerStatus.ACTIVE) {
         expect(newState.unitsInProgress[0].status).toBe(UnitStatus.ERROR);
         expect(newState.unitsInProgress[0].retryCount).toBe(3);
+      }
+    });
+
+    it("marks DIRTY when text changed (stale error)", () => {
+      const restoreDate = mockDateNow(1000);
+      try {
+        const unitId = {};
+        const debounceDelay = 300;
+        const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
+          maxRetries: 3,
+          dirtyHandling: { shouldRecalculate: true, debounceDelay, skipDirtyOnSelfChange: true },
+        });
+        const units = [
+          createProcessingUnit({
+            id: unitId,
+            status: UnitStatus.PROCESSING,
+            retryCount: 0,
+            text: "modified text",
+            requestText: "original text",
+          }),
+        ];
+        const state = createActiveState<TestResponse, TestContext, TestMetadata>({
+          unitsInProgress: units,
+          options,
+        });
+
+        const newState = handleAction(
+          state,
+          { type: ActionType.UNIT_ERROR, unitId, error: new Error("stale error") },
+          mockDecorationFactory,
+          mockEditorState,
+        );
+
+        expect(newState.status).toBe(RunnerStatus.ACTIVE);
+        if (newState.status === RunnerStatus.ACTIVE) {
+          expect(newState.unitsInProgress[0].status).toBe(UnitStatus.DIRTY);
+          expect(newState.unitsInProgress[0].retryCount).toBe(0); // Not incremented
+          expect(newState.unitsInProgress[0].requestText).toBeUndefined();
+          expect(newState.unitsInProgress[0].waitUntil).toBe(1000 + debounceDelay);
+        }
+      } finally {
+        restoreDate();
       }
     });
 
