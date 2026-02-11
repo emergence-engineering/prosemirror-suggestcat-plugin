@@ -7,6 +7,7 @@ import {
   GrammarSuggestion,
   GrammarUnitMetadata,
 } from "./types";
+import { ModelStateManager } from "./modelState";
 
 // Parse suggestions from diff between original and fixed text
 function parseSuggestions(
@@ -30,13 +31,14 @@ export interface GrammarProcessorOptions {
   apiKey: string;
   apiEndpoint?: string;
   model?: string;
+  modelStateManager?: ModelStateManager;
 }
 
 // Create processor with API options
 export const createGrammarProcessor = (options: GrammarProcessorOptions | string) => {
   // Support both old (string) and new (object) API
-  const { apiKey, apiEndpoint, model } = typeof options === "string"
-    ? { apiKey: options, apiEndpoint: undefined, model: undefined }
+  const { apiKey, apiEndpoint, model, modelStateManager } = typeof options === "string"
+    ? { apiKey: options, apiEndpoint: undefined, model: undefined, modelStateManager: undefined }
     : options;
 
   return async (
@@ -44,16 +46,26 @@ export const createGrammarProcessor = (options: GrammarProcessorOptions | string
     unit: ProcessingUnit<GrammarUnitMetadata>,
   ): Promise<UnitProcessorResult<GrammarFixResult>> => {
     try {
+      // Get current model (may be fallback if primary has failed)
+      const currentModel = modelStateManager?.getCurrentModel() ?? model;
+
       // Call the grammar API using centralized request
       const result = await grammarRequest({
         apiKey,
         text: unit.text,
         endpoint: apiEndpoint,
-        model,
+        model: currentModel,
       });
 
+      // Handle model state based on result
+      if (result.error) {
+        modelStateManager?.handleFailure();
+      } else {
+        modelStateManager?.handleSuccess();
+      }
+
       if (!result.fixed) {
-        // No fixes needed
+        // No fixes needed (or error occurred)
         return {
           data: {
             fixed: false,
@@ -76,6 +88,7 @@ export const createGrammarProcessor = (options: GrammarProcessorOptions | string
         },
       };
     } catch (error) {
+      modelStateManager?.handleFailure();
       return {
         error: error instanceof Error ? error : new Error(String(error)),
       };

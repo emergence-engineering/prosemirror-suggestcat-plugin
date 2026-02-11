@@ -11,6 +11,7 @@ export interface GrammarRequestOptions {
 export interface GrammarRequestResult {
   result: string;
   fixed: boolean;
+  error?: boolean; // true if HTTP error or network error
 }
 
 /**
@@ -53,6 +54,7 @@ export async function grammarRequest(
       return {
         fixed: false,
         result: text,
+        error: true,
       };
     }
 
@@ -74,6 +76,7 @@ export async function grammarRequest(
     return {
       fixed: false,
       result: text,
+      error: true,
     };
   }
 }

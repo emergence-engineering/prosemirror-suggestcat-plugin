@@ -25,6 +25,7 @@ import {
   selectSuggestion,
   requestHint,
 } from "./actions";
+import { createModelStateManager, ModelStateManager } from "./modelState";
 
 type GrammarState = RunnerState<
   GrammarFixResult,
@@ -156,6 +157,7 @@ export function grammarSuggestPluginV2(
   const {
     apiEndpoint,
     model,
+    fallback,
     batchSize = 4,
     maxRetries = 3,
     backoffBase = 2000,
@@ -163,10 +165,20 @@ export function grammarSuggestPluginV2(
     createPopup = defaultCreatePopup,
   } = options;
 
+  // Create model state manager for fallback handling
+  const modelStateManager: ModelStateManager | undefined = fallback
+    ? createModelStateManager({
+        primaryModel: model as string | undefined,
+        fallbackModel: fallback.fallbackModel as string,
+        failureThreshold: fallback.failureThreshold ?? 3,
+      })
+    : undefined;
+
   const processor = createGrammarProcessor({
     apiKey,
     apiEndpoint,
-    model,
+    model: model as string | undefined,
+    modelStateManager,
   });
 
   // Create the base block runner plugin
@@ -236,7 +248,7 @@ export function grammarSuggestPluginV2(
               pos,
               () => acceptSuggestion(view, grammarSuggestV2Key, selectedDecoration.spec.id),
               () => discardSuggestion(view, grammarSuggestV2Key, selectedDecoration.spec.id),
-              () => requestHint(apiKey, spec.originalText, spec.replacement, { endpoint: apiEndpoint, model: model as string }),
+              () => requestHint(apiKey, spec.originalText, spec.replacement, { endpoint: apiEndpoint, model: model as string, modelStateManager }),
             );
           },
           { id: selectedDecoration.spec.id, side: -1, stopEvent: () => true },

@@ -8,21 +8,34 @@
 
 ![feature-gif](https://suggestcat.com/suggestcat.gif)
 
-- Adds AI features to your ProseMirror editor
-- YJS support
-- Text completion, rewriting content to make it shorter or longer.
+- AI-powered grammar and style corrections for ProseMirror
+- AI text completion, rewriting, translation, tone changes and more — with streaming
+- Inline autocomplete with ghost text (like GitHub Copilot)
+- Paragraph-level processing with dirty state tracking and parallel execution
+- Multiple AI model support with automatic fallback
 
-## How to use?
+## Getting started
 
-- Create your API_KEY on [SuggestCat](https://www.suggestcat.com/)
-- Add `grammarSuggestPlugin`
-- Add your api key
-- And `defaultOptions` which you can override
+1. Create an account on [SuggestCat](https://www.suggestcat.com/) and generate an API key
+2. Install the package
+
+```sh
+npm i prosemirror-suggestcat-plugin
+```
+
+3. Add the plugins you need to your ProseMirror (or TipTap) editor using your API key
+4. Import the styles or write your own CSS
+5. Track your usage and manage API keys on your [admin dashboard](https://www.suggestcat.com/)
+
+## Grammar suggestion plugin
+
+Checks your text for grammar and style issues paragraph by paragraph. Only edited paragraphs are re-checked, and multiple paragraphs are processed in parallel.
 
 ```typescript
 import {
-  grammarSuggestPlugin,
-  defaultOptions,
+  grammarSuggestPluginV2,
+  grammarSuggestV2Key,
+  ActionType,
 } from "prosemirror-suggestcat-plugin";
 
 const view = new EditorView(document.querySelector("#editor"), {
@@ -30,8 +43,149 @@ const view = new EditorView(document.querySelector("#editor"), {
     doc: schema.nodeFromJSON(initialDoc),
     plugins: [
       ...exampleSetup({ schema }),
-      grammarSuggestPlugin(PROSEMIRROR_SUGGESTCAT_PLUGIN_API_KEY, {
-        ...defaultOptions,
+      grammarSuggestPluginV2("<YOUR_API_KEY>", {
+        debounceMs: 1000,
+        batchSize: 4,
+      }),
+    ],
+  }),
+});
+
+// Initialize the grammar checker
+view.dispatch(
+  view.state.tr.setMeta(grammarSuggestV2Key, {
+    type: ActionType.INIT,
+    metadata: {},
+  }),
+);
+```
+
+### Options
+
+```typescript
+interface GrammarSuggestV2Options {
+  apiKey: string;
+  apiEndpoint?: string;
+  model?: string | AIModel;
+  fallback?: {
+    fallbackModel: string | AIModel;
+    failureThreshold?: number;  // default: 3
+  };
+  batchSize?: number;           // parallel workers, default: 4
+  maxRetries?: number;          // default: 3
+  backoffBase?: number;         // default: 2000ms
+  debounceMs?: number;          // default: 1000ms
+  createPopup?: (
+    view: EditorView,
+    decoration: Decoration,
+    pos: number,
+    applySuggestion: () => void,
+    discardSuggestion: () => void,
+    requestHint: () => Promise<string>,
+  ) => HTMLElement;
+}
+```
+
+### Styles
+
+```typescript
+import "prosemirror-suggestcat-plugin/dist/styles/styles.css";
+```
+
+Or style the decorations yourself using these CSS classes:
+
+- `.grammarSuggestionV2` — inline decoration on suggestions
+- `.removalSuggestionV2` — when the suggestion is a deletion
+- `.grammarSuggestionV2-selected` — currently selected suggestion
+- `.grammarPopupV2` — popup container
+
+## Complete plugin
+
+AI text completion and transformation with streaming support. Use it to complete, shorten, lengthen, simplify, explain, translate text and more.
+
+```typescript
+import { completePluginV2 } from "prosemirror-suggestcat-plugin";
+
+const view = new EditorView(document.querySelector("#editor"), {
+  state: EditorState.create({
+    doc: schema.nodeFromJSON(initialDoc),
+    plugins: [
+      ...exampleSetup({ schema }),
+      completePluginV2("<YOUR_API_KEY>", {
+        maxSelection: 1000,
+      }),
+    ],
+  }),
+});
+```
+
+### Triggering tasks
+
+Use action functions instead of dispatching metas directly:
+
+```typescript
+import {
+  startTask,
+  acceptResult,
+  rejectResult,
+  cancelTask,
+  getCompleteState,
+  AiPromptsWithoutParam,
+  AiPromptsWithParam,
+  MoodParamType,
+  TranslationTargetLanguage,
+} from "prosemirror-suggestcat-plugin";
+
+// Continue writing from cursor
+startTask(view, AiPromptsWithoutParam.Complete);
+
+// Transform selected text
+startTask(view, AiPromptsWithoutParam.MakeShorter);
+startTask(view, AiPromptsWithoutParam.MakeLonger);
+startTask(view, AiPromptsWithoutParam.Simplify);
+startTask(view, AiPromptsWithoutParam.Explain);
+startTask(view, AiPromptsWithoutParam.ActionItems);
+startTask(view, AiPromptsWithoutParam.Improve);
+
+// Tasks with parameters
+startTask(view, AiPromptsWithParam.ChangeTone, {
+  mood: MoodParamType.Friendly,
+});
+startTask(view, AiPromptsWithParam.Translate, {
+  targetLanguage: TranslationTargetLanguage.Spanish,
+});
+
+// Accept or reject the result once streaming finishes
+acceptResult(view);
+rejectResult(view);
+
+// Cancel an in-progress task
+cancelTask(view);
+```
+
+### State flow
+
+```
+IDLE -> PENDING -> STREAMING -> PREVIEW -> APPLYING -> IDLE
+```
+
+During `STREAMING` the result is built up incrementally. At `PREVIEW` you can accept or reject. Only one task runs at a time.
+
+## Autocomplete plugin
+
+Inline ghost-text completions that appear after the cursor as you type. Press **Tab** to accept, **Escape** to dismiss.
+
+```typescript
+import { autoCompletePlugin } from "prosemirror-suggestcat-plugin";
+
+const view = new EditorView(document.querySelector("#editor"), {
+  state: EditorState.create({
+    doc: schema.nodeFromJSON(initialDoc),
+    plugins: [
+      ...exampleSetup({ schema }),
+      autoCompletePlugin("<YOUR_API_KEY>", {
+        debounceMs: 500,
+        maxContextLength: 2000,
       }),
     ],
   }),
@@ -40,204 +194,183 @@ const view = new EditorView(document.querySelector("#editor"), {
 
 ### Options
 
-- `GrammarSuggestPluginOptions`
-
 ```typescript
-export type GrammarSuggestPluginOptions = {
-  debounceMs: number;
-  createUpdatePopup: (
-    view: EditorView,
-    decoration: Decoration,
-    pos: number,
-    applySuggestion: (view: EditorView, decoration: Decoration) => void,
-    discardSuggestion: (view: EditorView, decoration: Decoration) => void,
-  ) => HTMLElement;
-};
-```
-
-- `defaultOptions` which you can import from our library
-
-```typescript
-export const defaultOptions: GrammarSuggestPluginOptions = {
-  debounceMs: 2000,
-  createUpdatePopup,
-};
+interface AutoCompleteOptions {
+  debounceMs: number;          // default: 500
+  maxContextLength: number;    // default: 2000
+  apiEndpoint?: string;
+  model?: string;
+  ghostTextClass?: string;     // default: "autoCompleteGhostText"
+}
 ```
 
 ### Styles
 
-- Add our css for the popup, or you can create your own using `createUpdatePopup` option
-
-```typescript
-import "prosemirror-suggestcat-plugin/dist/styles/styles.css";
-```
-
-- Our popup structure:
-
-```html
-
-<div classname="grammar-suggest-tooltip ProseMirror-widget">
-    <div classname="grammar-suggest-tooltip-apply">
-        suggestion
-    </div
-    <div classname="grammar-suggest-tooltip-discard">
-        <svg/>
-    </div
-</div
-```
-
-- Style the editor decorations with the follwing classnames
+Add CSS for the ghost text:
 
 ```css
-.grammarSuggestion {
-  background-color: green;
-}
-
-.grammarSuggestion .removalSuggestion {
-  background-color: red;
+.autoCompleteGhostText {
+  color: #9ca3af;
+  opacity: 0.7;
+  pointer-events: none;
 }
 ```
 
-### AI feature to complete text, or make it longer/shorter
+### Programmatic control
 
-- you can use another plugin from this package called `completePlugin`
-- with prosemirror meta calls you can transform your existing content, or generate more content based on your existing content
-
-#### Usage
-
-- import the `completePlugin` and provide your API key, and optional options
-
-```ts
+```typescript
 import {
-  completePluginKey,
-  completePlugin,
-  defaultCompleteOptions,
-  completePluginKey,
+  setAutoCompleteEnabled,
+  acceptAutoCompletion,
+  dismissAutoCompletion,
+  isAutoCompleteEnabled,
+  hasAutoCompletion,
 } from "prosemirror-suggestcat-plugin";
 
-const v = new EditorView(document.querySelector("#editor"), {
-  state: EditorState.create({
-    doc: schema.nodeFromJSON(initialDoc),
-    plugins: [
-      ...exampleSetup({ schema }),
-      completePlugin(<YOUR_API_KEY>, defaultCompleteOptions),
-    ],
-  }),
+setAutoCompleteEnabled(view, true);
+setAutoCompleteEnabled(view, false);
+
+if (hasAutoCompletion(view)) {
+  acceptAutoCompletion(view);
+  // or
+  dismissAutoCompletion(view);
+}
+```
+
+## How it works
+
+### API
+
+All plugins communicate with the SuggestCat backend through a shared API module. You can configure the endpoint and model per plugin, or use the defaults (`openai:gpt-4o-mini`).
+
+The module exposes two request functions if you need to use them directly:
+
+- `grammarRequest(options)` — a non-streaming POST that returns the corrected text and a list of modifications
+- `streamingRequest(options, callbacks)` — a streaming request with `onChunk`, `onComplete` and `onError` callbacks, used by the complete and autocomplete plugins. Supports cancellation via `AbortSignal`.
+
+Both accept an `ApiConfig` (`apiKey`, optional `endpoint`, optional `model`). You can use `createApiConfig` or `createGrammarApiConfig` to fill in defaults.
+
+```typescript
+import {
+  streamingRequest,
+  grammarRequest,
+  createApiConfig,
+  createGrammarApiConfig,
+} from "prosemirror-suggestcat-plugin";
+```
+
+### Block runner
+
+The grammar suggestion plugin is built on top of a generic **block runner** framework. Instead of sending the entire document to the API, it splits the document into processing units (paragraphs by default) and processes them in parallel.
+
+Key properties:
+
+- **Paragraph-level processing** — each paragraph is an independent unit, so large documents don't result in oversized API calls
+- **Dirty state tracking** — when a paragraph is edited, only that unit is marked dirty and re-processed after a debounce delay. The plugin skips dirty marking for its own document changes (e.g. applying a suggestion)
+- **Parallel execution** — multiple units are processed concurrently, controlled by `batchSize`. A unit goes through `QUEUED → PROCESSING → DONE` (or `BACKOFF → retry` on failure)
+- **Retry with backoff** — failed units are retried up to `maxRetries` times with exponential backoff
+
+The block runner is also exported as a standalone building block. You can use it to build your own paragraph-level processing plugins. The package includes a few example plugins (link detector, word complexity, sentence length) that demonstrate how to wire up a custom processor.
+
+```typescript
+import {
+  blockRunnerPlugin,
+  createBlockRunnerKey,
+  ActionType,
+  dispatchAction,
+} from "prosemirror-suggestcat-plugin";
+```
+
+To create a block runner plugin, provide a `pluginKey`, a `unitProcessor` (async function that receives a processing unit and returns a result), a `decorationFactory` (turns results into ProseMirror decorations), and optionally a `widgetFactory` (shows per-unit status indicators) and a `decorationTransformer` (filters/modifies decorations based on context state).
+
+#### Helper functions
+
+The block runner exports utility functions you can use in your processor or elsewhere:
+
+- `extractTextWithMapping(doc, from, to)` — extracts text from a document range and builds a position mapping between text offsets and doc positions
+- `textToDocPos(textPos, mapping)` — converts a text-space position back to a document position using the mapping
+- `getUnitsInRange(doc, from, to, nodeTypes?)` — finds all matching nodes in a range
+- `createUnitsFromDocument(doc, from, to, metadataFactory, nodeTypes?)` — creates processing units from document nodes
+- `getProgress(state)` — returns `{ completed, total, decorations }` for progress tracking
+- `calculateBackoff(retryCount, baseMs)` — computes the backoff delay for retries
+- `allUnitsFinished(units)` — checks if all units are in a terminal state (DONE or ERROR)
+
+#### Manual transactions
+
+You can control the block runner by dispatching actions via `dispatchAction(view, pluginKey, action)`:
+
+```typescript
+import { dispatchAction, ActionType } from "prosemirror-suggestcat-plugin";
+
+// Initialize — creates units from the document and starts processing
+dispatchAction(view, myPluginKey, {
+  type: ActionType.INIT,
+  metadata: {},
+});
+
+// Pause processing
+dispatchAction(view, myPluginKey, { type: ActionType.FINISH });
+
+// Resume paused processing
+dispatchAction(view, myPluginKey, { type: ActionType.RESUME });
+
+// Clear all state
+dispatchAction(view, myPluginKey, { type: ActionType.CLEAR });
+
+// Remove a specific decoration
+dispatchAction(view, myPluginKey, {
+  type: ActionType.REMOVE_DECORATION,
+  id: decorationId,
+});
+
+// Update context state (e.g. for filtering or selection)
+dispatchAction(view, myPluginKey, {
+  type: ActionType.UPDATE_CONTEXT,
+  contextState: { selectedSuggestionId: someId },
 });
 ```
 
-- `DefaultCompleteOptions`:
-- `maxSelection` defaults to 1000 - can controll how long text will be sent to AI to transform it
+There are also convenience wrappers: `pauseRunner(view, pluginKey)`, `resumeRunner(view, pluginKey)`, and `canResume(state)`.
 
-```ts
-export interface DefaultCompleteOptions {
-  maxSelection: number;
-}
+## Available models
+
+All plugins accept a `model` option:
+
+```typescript
+type AIModel =
+  | "openai:gpt-4o"
+  | "openai:gpt-4o-mini"       // default
+  | "cerebras:llama-3.1-8b"
+  | "cerebras:llama-3.3-70b"
+  | "cerebras:qwen-3-32b";
 ```
 
-#### How it works?
+## TipTap
 
-- the plugin's initial state is `{status: "idle"}`
-- send the plugin a task using `setMeta` using the `completePluginKey` plugin key
+All plugins work with TipTap by wrapping them in an extension:
 
-```ts
-view.dispatch(
-  view.state.tr.setMeta(completePluginKey, {
-    type: "Complete",
-    status: "new",
-  }),
-);
+```typescript
+import { Extension } from "@tiptap/core";
+import {
+  grammarSuggestPluginV2,
+  grammarSuggestV2Key,
+  ActionType,
+  completePluginV2,
+  autoCompletePlugin,
+} from "prosemirror-suggestcat-plugin";
+
+const SuggestCatExtension = Extension.create({
+  name: "suggestcat",
+  addProseMirrorPlugins() {
+    return [
+      grammarSuggestPluginV2("<YOUR_API_KEY>"),
+      completePluginV2("<YOUR_API_KEY>"),
+      autoCompletePlugin("<YOUR_API_KEY>"),
+    ];
+  },
+});
 ```
 
-- pluginState will change to `{type: "Complete", status: "streaming", result: "some string being streamed...", }`
+## React UI
 
-- when the AI finishes the pluginState's status changes to `{status: "finished"}`
-- at this point you can either accept or reject the completion
-
-```ts
-view.dispatch(
-  view.state.tr.setMeta(completePluginKey, {
-    type: "Complete",
-    status: "accpeted",
-  }),
-);
-```
-
-- after accepting it, your completion will be placed at the end of your document and the pluginState changes to `{status: "idle"}`waiting for a new task
-- only one task can be ran at once
-- only pluginState with `{status: "idle"}` can handle a new task
-- if pluginState has an error like `{status: "error", error: "selection is too big"}` you can clear the error dispatching an `accepted` meta like above
-- the plugin takes care of replacing existing text, or appending the completion result to the end of your document
-- `MakeLonger/MakeShorter` - requires a selection, which content to make shorter or longer
-
-```ts
-export enum TaskType {
-  Complete = "Complete",
-  Improve = "Improve",
-  MakeLonger = "MakeLonger",
-  MakeShorter = "MakeShorter",
-  Simplify = "Simplify",
-  Explain = "Explain",
-  ActionItems = "ActionItems",
-}
-export enum OpenAiPromptsWithParam {
-  ChangeTone = "ChangeTone",
-  Translate = "Translate",
-}
-
-export enum Status {
-  idle = "idle",
-  new = "new",
-  streaming = "streaming",
-  finished = "finished",
-  accepted = "accepted",
-  rejected = "rejected",
-  done = "done",
-  error = "error",
-}
-
-export interface CompletePluginState {
-  type?: TaskType;
-  status?: Status;
-  result?: string;
-  selection?: TextSelection;
-  error?: string;
-}
-
-export interface TaskMeta {
-  type: TaskType;
-  status: Status.new | Status.accepted | Status.rejected;
-}
-```
-
-- Example for completion
-
-```ts
-const getStuff = useCallback(() => {
-  if (!view) {
-    return;
-  }
-
-  view.dispatch(
-    view.state.tr.setMeta(completePluginKey, {
-      type: "Complete",
-      status: "new",
-    }),
-  );
-}, [view]);
-
-const completeStuff = useCallback(() => {
-  if (!view) {
-    return;
-  }
-  const state = completePluginKey.getState(view.state);
-
-  if (state?.status === "finished")
-    view.dispatch(
-      view.state.tr.setMeta(completePluginKey, {
-        type: "Complete",
-        status: "accepted",
-      }),
-    );
-}, [view]);
-```
+For a ready-made React UI with a slash menu, suggestion overlay and "Ask AI" tooltip, see [prosemirror-suggestcat-plugin-react](https://github.com/emergence-engineering/prosemirror-suggestcat-plugin-react).

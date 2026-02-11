@@ -6,6 +6,7 @@ export type {
   GrammarUnitMetadata,
   GrammarSuggestV2Options,
   GrammarDecorationSpec,
+  ModelFallbackConfig,
 } from "./types";
 
 // Plugin

@@ -2,6 +2,12 @@ import { EditorView } from "prosemirror-view";
 import { Decoration } from "prosemirror-view";
 import { AIModel } from "../api/config";
 
+// Model fallback configuration
+export interface ModelFallbackConfig {
+  fallbackModel: string | AIModel;
+  failureThreshold?: number; // Default: 3
+}
+
 // Single grammar suggestion within a paragraph
 export interface GrammarSuggestion {
   from: number; // text position within paragraph
@@ -33,6 +39,7 @@ export interface GrammarSuggestV2Options {
   apiKey: string;
   apiEndpoint?: string;
   model?: string | AIModel;
+  fallback?: ModelFallbackConfig;
   batchSize?: number; // Default: 2
   maxRetries?: number; // Default: 3
   backoffBase?: number; // Default: 2000

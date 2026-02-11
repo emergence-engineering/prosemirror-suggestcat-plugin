@@ -11,6 +11,7 @@ import {
 import { streamingRequest } from "../api/streaming";
 import { AiPromptsWithParam, HintParams } from "../types";
 import { DEFAULT_COMPLETION_ENDPOINT, DEFAULT_MODEL } from "../api/config";
+import { ModelStateManager } from "./modelState";
 
 type GrammarState = RunnerState<
   GrammarFixResult,
@@ -129,10 +130,12 @@ export async function requestHint(
   apiKey: string,
   originalText: string,
   replacement: string,
-  options?: { endpoint?: string; model?: string },
+  options?: { endpoint?: string; model?: string; modelStateManager?: ModelStateManager },
 ): Promise<string> {
   const endpoint = options?.endpoint ?? DEFAULT_COMPLETION_ENDPOINT;
-  const model = options?.model ?? DEFAULT_MODEL;
+  const modelStateManager = options?.modelStateManager;
+  // Get current model from state manager if available, otherwise use provided model or default
+  const model = modelStateManager?.getCurrentModel() ?? options?.model ?? DEFAULT_MODEL;
 
   return new Promise((resolve, reject) => {
     const params: HintParams = {
@@ -155,9 +158,11 @@ export async function requestHint(
           // Streaming chunks - no action needed for hint
         },
         onComplete: (result) => {
+          modelStateManager?.handleSuccess();
           resolve(result);
         },
         onError: (error) => {
+          modelStateManager?.handleFailure();
           reject(error);
         },
       },
