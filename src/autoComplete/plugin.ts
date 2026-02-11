@@ -351,7 +351,7 @@ export function autoCompletePlugin(
             prevPluginState?.status !== AutoCompleteStatus.STREAMING
           ) {
             // Check if this looks like a text input (not a paste or programmatic change)
-            const lastTr = (view.state as never).tr;
+            const lastTr = view.state.tr;
 
             // Reset any existing timer
             if (debounceTimer) {
