@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 2.0.0
+
+### Major Changes
+
+- V2 implementation, block runner, autocomplete, model support, fallback logic.
+
 ## 1.1.1
 
 ### Patch Changes
