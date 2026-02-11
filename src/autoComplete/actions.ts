@@ -13,7 +13,10 @@ import { cancelActiveRequest } from "./streaming";
 /**
  * Enable or disable the auto-complete plugin
  */
-export function setAutoCompleteEnabled(view: EditorView, enabled: boolean): void {
+export function setAutoCompleteEnabled(
+  view: EditorView,
+  enabled: boolean,
+): void {
   if (!enabled) {
     // Cancel any active request when disabling
     cancelActiveRequest(view);

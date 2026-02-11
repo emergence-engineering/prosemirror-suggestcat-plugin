@@ -30,4 +30,7 @@ export {
 } from "./decorations";
 
 // Processor (for customization)
-export { createGrammarProcessor, type GrammarProcessorOptions } from "./processor";
+export {
+  createGrammarProcessor,
+  type GrammarProcessorOptions,
+} from "./processor";

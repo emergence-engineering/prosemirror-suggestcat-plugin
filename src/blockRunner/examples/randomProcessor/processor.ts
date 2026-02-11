@@ -44,7 +44,7 @@ export const createRandomProcessor = (
     if (shouldFail) {
       return {
         error: new Error(
-          `Random error after ${processingTime}ms (attempt ${unit.metadata.attempt})`
+          `Random error after ${processingTime}ms (attempt ${unit.metadata.attempt})`,
         ),
       };
     }
@@ -53,7 +53,10 @@ export const createRandomProcessor = (
       data: {
         processingTime,
         success: true,
-        message: `Processed "${unit.text.slice(0, 20)}..." in ${processingTime}ms`,
+        message: `Processed "${unit.text.slice(
+          0,
+          20,
+        )}..." in ${processingTime}ms`,
       },
     };
   };
@@ -74,7 +77,7 @@ export const randomProcessor = async (
   if (shouldFail) {
     return {
       error: new Error(
-        `Random error after ${processingTime}ms (attempt ${unit.metadata.attempt})`
+        `Random error after ${processingTime}ms (attempt ${unit.metadata.attempt})`,
       ),
     };
   }
@@ -83,7 +86,10 @@ export const randomProcessor = async (
     data: {
       processingTime,
       success: true,
-      message: `Processed "${unit.text.slice(0, 20)}..." in ${processingTime}ms`,
+      message: `Processed "${unit.text.slice(
+        0,
+        20,
+      )}..." in ${processingTime}ms`,
     },
   };
 };

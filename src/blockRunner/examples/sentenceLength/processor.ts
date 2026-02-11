@@ -30,9 +30,9 @@ function findLongSentences(
   errorThreshold: number,
 ): LongSentence[] {
   const longSentences: LongSentence[] = [];
-  let match: RegExpExecArray | null;
+  let match: RegExpExecArray | null = SENTENCE_REGEX.exec(text);
 
-  while ((match = SENTENCE_REGEX.exec(text)) !== null) {
+  while (match !== null) {
     const sentence = match[0];
     const wordCount = countWords(sentence);
 
@@ -44,6 +44,7 @@ function findLongSentences(
         severity: wordCount >= errorThreshold ? "error" : "warning",
       });
     }
+    match = SENTENCE_REGEX.exec(text);
   }
 
   return longSentences;

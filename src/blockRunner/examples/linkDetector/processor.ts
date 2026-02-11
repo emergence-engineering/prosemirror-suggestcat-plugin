@@ -8,14 +8,15 @@ const URL_REGEX = /https?:\/\/[^\s<>"')\]]+/g;
 // Detect links in text
 function detectLinks(text: string): LinkMatch[] {
   const matches: LinkMatch[] = [];
-  let match: RegExpExecArray | null;
+  let match: RegExpExecArray | null = URL_REGEX.exec(text);
 
-  while ((match = URL_REGEX.exec(text)) !== null) {
+  while (match !== null) {
     matches.push({
       url: match[0],
       from: match.index,
       to: match.index + match[0].length,
     });
+    match = URL_REGEX.exec(text);
   }
 
   return matches;

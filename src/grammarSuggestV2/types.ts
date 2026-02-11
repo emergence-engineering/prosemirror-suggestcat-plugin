@@ -1,5 +1,4 @@
-import { EditorView } from "prosemirror-view";
-import { Decoration } from "prosemirror-view";
+import { EditorView, Decoration } from "prosemirror-view";
 import { AIModel } from "../api/config";
 
 // Model fallback configuration

@@ -1,6 +1,7 @@
 import { Node } from "prosemirror-model";
 import { EditorState, PluginKey, Transaction } from "prosemirror-state";
 import { Decoration, EditorView } from "prosemirror-view";
+import { Mapping, StepMap } from "prosemirror-transform";
 import {
   Action,
   ActionType,
@@ -16,7 +17,6 @@ import {
   UnitRange,
   UnitStatus,
 } from "./types";
-import { Mapping, StepMap } from "prosemirror-transform";
 
 // Extract text with position mapping from document
 export function extractTextWithMapping(
@@ -88,78 +88,17 @@ export function getUnitsInRange(
   return units;
 }
 
-// Remap positions after document change
-export function remapPositions<ResponseType, ContextState, UnitMetadata>(
-  state: RunnerState<ResponseType, ContextState, UnitMetadata>,
-  tr: Transaction,
-  editorState: EditorState,
-  options: RunnerOptions<ResponseType, ContextState, UnitMetadata>,
-  skipDirtyMarking: boolean = false,
-): RunnerState<ResponseType, ContextState, UnitMetadata> {
-  const fixedMappings = fixYjsMappings(tr, editorState);
-  if (!fixedMappings) return state;
-  const { start, end, mapping: pmMapping } = fixedMappings;
-  const nodeTypes = Array.isArray(options.nodeTypes) ? options.nodeTypes : [options.nodeTypes];
-
-  const waitUntil = Date.now() + options.dirtyHandling.debounceDelay;
-
-  const nodes = state.unitsInProgress?.slice().sort((a, b) => a.from - b.from);
-  if(nodes) {
-    const newNodes: ProcessingUnit<UnitMetadata>[] = [];
-    const nodesFrom = pmMapping.map(nodes[0].from);
-    const nodesTo = pmMapping.map(nodes[nodes.length - 1].to);
-    const helperNodes = getUnitsInRange(tr.doc, nodesFrom, nodesTo, nodeTypes);
-    for (const idx in nodes) {
-      const node = nodes[idx];
-      const refNode = helperNodes[idx];
-      if (refNode) {
-        let status = node.status;
-        // Only mark as DIRTY if not skipping dirty marking (i.e., not a self-change)
-        if (!skipDirtyMarking && refNode.from <= end && refNode.to >= start) {
-          status = UnitStatus.DIRTY;
-        }
-        newNodes.push({
-          ...node,
-          status,
-          // Only update waitUntil if we're marking dirty
-          waitUntil: skipDirtyMarking ? node.waitUntil : waitUntil,
-          ...refNode,
-        });
-      } else {
-        newNodes.push({
-          ...node,
-          status: UnitStatus.DONE,
-          from: nodesTo,
-          to: nodesTo,
-        });
-      }
-    }
-    return {
-      ...state,
-      unitsInProgress: newNodes,
-      decorations: mapDecorationArray(state.decorations, pmMapping),
-    };
-  }
-
-  return {
-    ...state,
-    decorations: mapDecorationArray(state.decorations, pmMapping),
-  };
-}
-
 const mapDecorationArray = <D extends Decoration>(
   decorationArray: D[],
   mapping: Mapping,
 ): D[] => {
-  return (
-    decorationArray
-      .map(
-        (deco) =>
-          // @ts-expect-error the `Decoration.map` is internal
-          deco?.map(mapping, 0, 0),
-      )
-      .filter((deco): deco is D => deco !== null)
-  );
+  return decorationArray
+    .map(
+      (deco) =>
+        // @ts-expect-error the `Decoration.map` is internal
+        deco?.map(mapping, 0, 0),
+    )
+    .filter((deco): deco is D => deco !== null);
 };
 
 export const fixYjsMappings = (
@@ -204,9 +143,70 @@ export const fixYjsMappings = (
   };
 };
 
+// Remap positions after document change
+export function remapPositions<ResponseType, ContextState, UnitMetadata>(
+  state: RunnerState<ResponseType, ContextState, UnitMetadata>,
+  tr: Transaction,
+  editorState: EditorState,
+  options: RunnerOptions<ResponseType, ContextState, UnitMetadata>,
+  skipDirtyMarking = false,
+): RunnerState<ResponseType, ContextState, UnitMetadata> {
+  const fixedMappings = fixYjsMappings(tr, editorState);
+  if (!fixedMappings) return state;
+  const { start, end, mapping: pmMapping } = fixedMappings;
+  const nodeTypes = Array.isArray(options.nodeTypes)
+    ? options.nodeTypes
+    : [options.nodeTypes];
+
+  const waitUntil = Date.now() + options.dirtyHandling.debounceDelay;
+
+  const nodes = state.unitsInProgress?.slice().sort((a, b) => a.from - b.from);
+  if (nodes) {
+    const newNodes: ProcessingUnit<UnitMetadata>[] = [];
+    const nodesFrom = pmMapping.map(nodes[0].from);
+    const nodesTo = pmMapping.map(nodes[nodes.length - 1].to);
+    const helperNodes = getUnitsInRange(tr.doc, nodesFrom, nodesTo, nodeTypes);
+    for (const idx in nodes) {
+      const node = nodes[idx];
+      const refNode = helperNodes[idx];
+      if (refNode) {
+        let { status } = node;
+        // Only mark as DIRTY if not skipping dirty marking (i.e., not a self-change)
+        if (!skipDirtyMarking && refNode.from <= end && refNode.to >= start) {
+          status = UnitStatus.DIRTY;
+        }
+        newNodes.push({
+          ...node,
+          status,
+          // Only update waitUntil if we're marking dirty
+          waitUntil: skipDirtyMarking ? node.waitUntil : waitUntil,
+          ...refNode,
+        });
+      } else {
+        newNodes.push({
+          ...node,
+          status: UnitStatus.DONE,
+          from: nodesTo,
+          to: nodesTo,
+        });
+      }
+    }
+    return {
+      ...state,
+      unitsInProgress: newNodes,
+      decorations: mapDecorationArray(state.decorations, pmMapping),
+    };
+  }
+
+  return {
+    ...state,
+    decorations: mapDecorationArray(state.decorations, pmMapping),
+  };
+}
+
 // Calculate exponential backoff delay
 export function calculateBackoff(retryCount: number, baseMs: number): number {
-  return Math.pow(baseMs / 1000, retryCount) * 1000;
+  return (baseMs / 1000) ** retryCount * 1000;
 }
 
 // Get progress info from state

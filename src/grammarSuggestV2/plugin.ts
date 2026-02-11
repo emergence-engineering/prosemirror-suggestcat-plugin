@@ -98,7 +98,8 @@ const defaultCreatePopup = (
 
       // Load hint if not already loaded
       if (!hintLoaded) {
-        hintArea.innerHTML = '<span class="grammarPopupV2-loading">Loading...</span>';
+        hintArea.innerHTML =
+          '<span class="grammarPopupV2-loading">Loading...</span>';
 
         try {
           const hint = await onRequestHint();
@@ -235,7 +236,8 @@ export function grammarSuggestPluginV2(
         }
 
         // Add popup widget for selected decoration
-        const spec = selectedDecoration.spec as unknown as GrammarDecorationSpec;
+        const spec =
+          selectedDecoration.spec as unknown as GrammarDecorationSpec;
         const popupWidget = Decoration.widget(
           selectedDecoration.from,
           (view, getPos) => {
@@ -246,9 +248,24 @@ export function grammarSuggestPluginV2(
               view,
               selectedDecoration,
               pos,
-              () => acceptSuggestion(view, grammarSuggestV2Key, selectedDecoration.spec.id),
-              () => discardSuggestion(view, grammarSuggestV2Key, selectedDecoration.spec.id),
-              () => requestHint(apiKey, spec.originalText, spec.replacement, { endpoint: apiEndpoint, model: model as string, modelStateManager }),
+              () =>
+                acceptSuggestion(
+                  view,
+                  grammarSuggestV2Key,
+                  selectedDecoration.spec.id,
+                ),
+              () =>
+                discardSuggestion(
+                  view,
+                  grammarSuggestV2Key,
+                  selectedDecoration.spec.id,
+                ),
+              () =>
+                requestHint(apiKey, spec.originalText, spec.replacement, {
+                  endpoint: apiEndpoint,
+                  model: model as string,
+                  modelStateManager,
+                }),
             );
           },
           { id: selectedDecoration.spec.id, side: -1, stopEvent: () => true },
@@ -276,7 +293,9 @@ export function grammarSuggestPluginV2(
         }
 
         // Check if clicking already selected decoration
-        if (clickedDecoration.spec.id === state.contextState.selectedSuggestionId) {
+        if (
+          clickedDecoration.spec.id === state.contextState.selectedSuggestionId
+        ) {
           return false; // Already selected, let default behavior
         }
 

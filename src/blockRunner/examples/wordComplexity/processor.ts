@@ -8,8 +8,8 @@ import {
 } from "./types";
 
 // Count syllables in a word using vowel-based heuristic
-export function countSyllables(word: string): number {
-  word = word.toLowerCase().replace(/[^a-z]/g, "");
+export function countSyllables(wordIn: string): number {
+  let word = wordIn.toLowerCase().replace(/[^a-z]/g, "");
   if (word.length <= 3) return 1;
 
   // Remove silent e's and ed endings
@@ -35,9 +35,9 @@ function findComplexWords(
   highThreshold: number,
 ): ComplexWord[] {
   const complexWords: ComplexWord[] = [];
-  let match: RegExpExecArray | null;
+  let match: RegExpExecArray | null = WORD_REGEX.exec(text);
 
-  while ((match = WORD_REGEX.exec(text)) !== null) {
+  while (match !== null) {
     const word = match[0];
     const syllables = countSyllables(word);
 
@@ -50,6 +50,7 @@ function findComplexWords(
         complexity: syllables >= highThreshold ? "high" : "moderate",
       });
     }
+    match = WORD_REGEX.exec(text);
   }
 
   return complexWords;

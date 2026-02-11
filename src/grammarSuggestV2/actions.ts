@@ -130,12 +130,17 @@ export async function requestHint(
   apiKey: string,
   originalText: string,
   replacement: string,
-  options?: { endpoint?: string; model?: string; modelStateManager?: ModelStateManager },
+  options?: {
+    endpoint?: string;
+    model?: string;
+    modelStateManager?: ModelStateManager;
+  },
 ): Promise<string> {
   const endpoint = options?.endpoint ?? DEFAULT_COMPLETION_ENDPOINT;
   const modelStateManager = options?.modelStateManager;
   // Get current model from state manager if available, otherwise use provided model or default
-  const model = modelStateManager?.getCurrentModel() ?? options?.model ?? DEFAULT_MODEL;
+  const model =
+    modelStateManager?.getCurrentModel() ?? options?.model ?? DEFAULT_MODEL;
 
   return new Promise((resolve, reject) => {
     const params: HintParams = {

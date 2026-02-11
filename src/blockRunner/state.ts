@@ -83,14 +83,15 @@ function handleUnitSuccess<ResponseType, ContextState, UnitMetadata>(
   const waitUntil = Date.now() + state.options.dirtyHandling.debounceDelay;
 
   // Check if text changed since request started (stale response)
-  const isStale = unit.requestText !== undefined && unit.requestText !== unit.text;
+  const isStale =
+    unit.requestText !== undefined && unit.requestText !== unit.text;
 
   if (isStale) {
     // Response is stale - mark DIRTY to trigger reprocessing
     return updateUnit(state, action.unitId, {
       status: UnitStatus.DIRTY,
       requestText: undefined,
-      waitUntil: waitUntil,
+      waitUntil,
     });
   }
 
@@ -120,13 +121,14 @@ function handleUnitError<ResponseType, ContextState, UnitMetadata>(
   const waitUntil = Date.now() + state.options.dirtyHandling.debounceDelay;
 
   // Check if text changed since request started (stale error)
-  const isStale = unit.requestText !== undefined && unit.requestText !== unit.text;
+  const isStale =
+    unit.requestText !== undefined && unit.requestText !== unit.text;
   if (isStale) {
     // Response is stale - mark DIRTY to trigger reprocessing instead of retrying stale request
     return updateUnit(state, action.unitId, {
       status: UnitStatus.DIRTY,
       requestText: undefined,
-      waitUntil: waitUntil,
+      waitUntil,
     });
   }
 
@@ -145,7 +147,8 @@ function handleUnitError<ResponseType, ContextState, UnitMetadata>(
   return updateUnit(state, action.unitId, {
     status: UnitStatus.BACKOFF,
     retryCount: newRetryCount,
-    waitUntil: Date.now() + calculateBackoff(newRetryCount, state.options.backoffBase),
+    waitUntil:
+      Date.now() + calculateBackoff(newRetryCount, state.options.backoffBase),
     requestText: undefined,
   });
 }
@@ -230,9 +233,7 @@ export function handleAction<ResponseType, ContextState, UnitMetadata>(
     case ActionType.REMOVE_DECORATION:
       return {
         ...state,
-        decorations: state.decorations.filter(
-          (d) => d.spec.id !== action.id,
-        ),
+        decorations: state.decorations.filter((d) => d.spec.id !== action.id),
       };
 
     case ActionType.SELECT_DECORATION:

@@ -1,5 +1,9 @@
 import { Decoration } from "prosemirror-view";
-import { DecorationFactory, ProcessingUnit, ResultDecoration } from "../../types";
+import {
+  DecorationFactory,
+  ProcessingUnit,
+  ResultDecoration,
+} from "../../types";
 import { textToDocPos } from "../../utils";
 import { LinkDetectorMetadata, LinkDetectorResponse } from "./types";
 

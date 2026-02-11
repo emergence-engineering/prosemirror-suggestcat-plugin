@@ -116,7 +116,11 @@ describe("hasUnitsToProcess", () => {
 describe("_selectNextUnitForTesting (selectNextUnit)", () => {
   it("returns undefined for IDLE state", () => {
     const state = createIdleState<TestResponse, TestContext, TestMetadata>();
-    const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+    const options = createRunnerOptions<
+      TestResponse,
+      TestContext,
+      TestMetadata
+    >();
     expect(_selectNextUnitForTesting(state, options)).toBeUndefined();
   });
 
@@ -124,7 +128,11 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
     const state = createActiveState<TestResponse, TestContext, TestMetadata>({
       unitsInProgress: [],
     });
-    const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+    const options = createRunnerOptions<
+      TestResponse,
+      TestContext,
+      TestMetadata
+    >();
     expect(_selectNextUnitForTesting(state, options)).toBeUndefined();
   });
 
@@ -136,7 +144,11 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
     const state = createActiveState<TestResponse, TestContext, TestMetadata>({
       unitsInProgress: units,
     });
-    const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+    const options = createRunnerOptions<
+      TestResponse,
+      TestContext,
+      TestMetadata
+    >();
     expect(_selectNextUnitForTesting(state, options)).toBeUndefined();
   });
 
@@ -148,19 +160,30 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
     const state = createActiveState<TestResponse, TestContext, TestMetadata>({
       unitsInProgress: units,
     });
-    const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+    const options = createRunnerOptions<
+      TestResponse,
+      TestContext,
+      TestMetadata
+    >();
     expect(_selectNextUnitForTesting(state, options)).toBeUndefined();
   });
 
   it("returns ready QUEUED unit with waitUntil <= now", () => {
     const restoreDate = mockDateNow(1000);
     try {
-      const queuedUnit = createProcessingUnit({ status: UnitStatus.QUEUED, waitUntil: 500 });
+      const queuedUnit = createProcessingUnit({
+        status: UnitStatus.QUEUED,
+        waitUntil: 500,
+      });
       const units = [queuedUnit];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >();
 
       const result = _selectNextUnitForTesting(state, options);
       expect(result).toBe(queuedUnit);
@@ -172,12 +195,19 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
   it("returns ready BACKOFF unit with waitUntil <= now", () => {
     const restoreDate = mockDateNow(1000);
     try {
-      const backoffUnit = createProcessingUnit({ status: UnitStatus.BACKOFF, waitUntil: 500 });
+      const backoffUnit = createProcessingUnit({
+        status: UnitStatus.BACKOFF,
+        waitUntil: 500,
+      });
       const units = [backoffUnit];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >();
 
       const result = _selectNextUnitForTesting(state, options);
       expect(result).toBe(backoffUnit);
@@ -189,12 +219,19 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
   it("returns ready DIRTY unit with waitUntil <= now", () => {
     const restoreDate = mockDateNow(1000);
     try {
-      const dirtyUnit = createProcessingUnit({ status: UnitStatus.DIRTY, waitUntil: 500 });
+      const dirtyUnit = createProcessingUnit({
+        status: UnitStatus.DIRTY,
+        waitUntil: 500,
+      });
       const units = [dirtyUnit];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >();
 
       const result = _selectNextUnitForTesting(state, options);
       expect(result).toBe(dirtyUnit);
@@ -220,7 +257,11 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >({
         priorityFilter: (unit) => unit.metadata.label === "high",
       });
 
@@ -248,7 +289,11 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >({
         priorityFilter: () => false, // No priority match
       });
 
@@ -270,7 +315,11 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >();
 
       const result = _selectNextUnitForTesting(state, options);
       expect(result).toBe(blockingUnit);
@@ -296,7 +345,11 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >();
 
       const result = _selectNextUnitForTesting(state, options);
       expect(result).toBe(readyUnit);
@@ -316,7 +369,11 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >();
 
       const result = _selectNextUnitForTesting(state, options);
       expect(result).toBeUndefined();
@@ -336,7 +393,11 @@ describe("_selectNextUnitForTesting (selectNextUnit)", () => {
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >();
 
       const result = _selectNextUnitForTesting(state, options);
       expect(result).toBeUndefined();

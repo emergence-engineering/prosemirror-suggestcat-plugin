@@ -41,6 +41,39 @@ interface AutoCompleteStreamingParams {
 }
 
 /**
+ * Ensure proper spacing between existing text and suggestion.
+ *
+ * If the last character before cursor is not a space/hyphen, and the first
+ * character of the suggestion is not a space/hyphen, prepend a space.
+ */
+export function ensureLeadingSpace(
+  view: EditorView,
+  suggestion: string,
+): string {
+  if (!suggestion) {
+    return suggestion;
+  }
+
+  const { doc, selection } = view.state;
+  const cursorPos = selection.from;
+
+  // Get the character before cursor
+  if (cursorPos <= 0) {
+    return suggestion;
+  }
+
+  const charBefore = doc.textBetween(cursorPos - 1, cursorPos, "");
+  const firstCharOfSuggestion = suggestion.charAt(0);
+
+  // eslint-disable-next-line no-useless-escape
+  const spacingChars = /[\s\-]/;
+  const needsSpace =
+    !spacingChars.test(charBefore) && !spacingChars.test(firstCharOfSuggestion);
+
+  return needsSpace ? ` ${suggestion}` : suggestion;
+}
+
+/**
  * Make a streaming request to the AI API for auto-completion
  */
 export async function streamingRequest({
@@ -123,35 +156,6 @@ export function extractContext(view: EditorView, maxLength: number): string {
   }
 
   return fullText;
-}
-
-/**
- * Ensure proper spacing between existing text and suggestion.
- *
- * If the last character before cursor is not a space/hyphen, and the first
- * character of the suggestion is not a space/hyphen, prepend a space.
- */
-export function ensureLeadingSpace(view: EditorView, suggestion: string): string {
-  if (!suggestion) {
-    return suggestion;
-  }
-
-  const { doc, selection } = view.state;
-  const cursorPos = selection.from;
-
-  // Get the character before cursor
-  if (cursorPos <= 0) {
-    return suggestion;
-  }
-
-  const charBefore = doc.textBetween(cursorPos - 1, cursorPos, "");
-  const firstCharOfSuggestion = suggestion.charAt(0);
-
-  const spacingChars = /[\s\-]/;
-  const needsSpace =
-    !spacingChars.test(charBefore) && !spacingChars.test(firstCharOfSuggestion);
-
-  return needsSpace ? " " + suggestion : suggestion;
 }
 
 /**

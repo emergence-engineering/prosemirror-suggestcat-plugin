@@ -37,12 +37,13 @@ export const randomProcessorDecorationFactory: DecorationFactory<
 };
 
 // Widget factory for showing loading/error states
-export const randomProcessorWidgetFactory: WidgetFactory<RandomProcessorMetadata> = (
-  unit: ProcessingUnit<RandomProcessorMetadata>,
-): Decoration | undefined => {
+export const randomProcessorWidgetFactory: WidgetFactory<
+  RandomProcessorMetadata
+> = (unit: ProcessingUnit<RandomProcessorMetadata>): Decoration | undefined => {
   // Create widget based on status
   let content: string;
   let className: string;
+  const waitTime = Math.max(0, unit.waitUntil - Date.now());
 
   switch (unit.status) {
     case UnitStatus.QUEUED:
@@ -54,8 +55,9 @@ export const randomProcessorWidgetFactory: WidgetFactory<RandomProcessorMetadata
       className = "random-processor-widget processing";
       break;
     case UnitStatus.BACKOFF:
-      const waitTime = Math.max(0, unit.waitUntil - Date.now());
-      content = `🔄 Retry in ${Math.ceil(waitTime / 1000)}s (attempt ${unit.retryCount + 1})`;
+      content = `🔄 Retry in ${Math.ceil(waitTime / 1000)}s (attempt ${
+        unit.retryCount + 1
+      })`;
       className = "random-processor-widget backoff";
       break;
     case UnitStatus.ERROR:

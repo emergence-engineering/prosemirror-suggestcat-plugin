@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import { Decoration, EditorView } from "prosemirror-view";
 
 // Runner status - whether the runner is actively processing
@@ -114,7 +115,10 @@ export interface DirtyHandlingOptions {
 
 // Partial runner options - allows partial dirtyHandling
 export type PartialRunnerOptions<ResponseType, ContextState, UnitMetadata> =
-  Omit<Partial<RunnerOptions<ResponseType, ContextState, UnitMetadata>>, 'dirtyHandling'> & {
+  Omit<
+    Partial<RunnerOptions<ResponseType, ContextState, UnitMetadata>>,
+    "dirtyHandling"
+  > & {
     dirtyHandling?: Partial<DirtyHandlingOptions>;
   };
 
@@ -247,7 +251,10 @@ export type UnitProcessor<ResponseType = unknown, UnitMetadata = unknown> = (
 ) => Promise<UnitProcessorResult<ResponseType>>;
 
 // Decoration factory - converts response to decorations
-export type DecorationFactory<ResponseType = unknown, UnitMetadata = unknown> = (
+export type DecorationFactory<
+  ResponseType = unknown,
+  UnitMetadata = unknown,
+> = (
   response: ResponseType,
   unit: ProcessingUnit<UnitMetadata>,
 ) => ResultDecoration<ResponseType>[];

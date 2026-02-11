@@ -9,7 +9,12 @@ import {
   WidgetFactory,
 } from "../blockRunner/types";
 import { textToDocPos } from "../blockRunner/utils";
-import { GrammarContextState, GrammarDecorationSpec, GrammarFixResult, GrammarUnitMetadata, } from "./types";
+import {
+  GrammarContextState,
+  GrammarDecorationSpec,
+  GrammarFixResult,
+  GrammarUnitMetadata,
+} from "./types";
 
 // Decoration factory - creates decorations for each suggestion
 export const grammarDecorationFactory: DecorationFactory<
@@ -54,7 +59,11 @@ export const grammarDecorationTransformer: DecorationTransformer<
   GrammarUnitMetadata
 > = (
   decorations: ResultDecoration<GrammarFixResult>[],
-  state: RunnerState<GrammarFixResult, GrammarContextState, GrammarUnitMetadata>,
+  state: RunnerState<
+    GrammarFixResult,
+    GrammarContextState,
+    GrammarUnitMetadata
+  >,
 ): ResultDecoration<GrammarFixResult>[] => {
   const selectedId = state.contextState.selectedSuggestionId;
   if (!selectedId) return decorations;
@@ -82,6 +91,7 @@ export const grammarWidgetFactory: WidgetFactory<GrammarUnitMetadata> = (
 ): Decoration | undefined => {
   let content: string;
   let className: string;
+  const waitTime = Math.max(0, unit.waitUntil - Date.now());
 
   switch (unit.status) {
     case UnitStatus.QUEUED:
@@ -94,7 +104,6 @@ export const grammarWidgetFactory: WidgetFactory<GrammarUnitMetadata> = (
       className = "grammarWidgetV2 processing";
       break;
     case UnitStatus.BACKOFF:
-      const waitTime = Math.max(0, unit.waitUntil - Date.now());
       content = `🔄 ${Math.ceil(waitTime / 1000)}s`;
       className = "grammarWidgetV2 backoff";
       break;

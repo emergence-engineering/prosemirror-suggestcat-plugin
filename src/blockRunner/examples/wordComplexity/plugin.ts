@@ -26,7 +26,11 @@ export const wordComplexityKey = createBlockRunnerKey<
 export function createWordComplexityPlugin(
   initialContext: Partial<WordComplexityContext> = {},
 ): Plugin<
-  RunnerState<WordComplexityResponse, WordComplexityContext, WordComplexityMetadata>
+  RunnerState<
+    WordComplexityResponse,
+    WordComplexityContext,
+    WordComplexityMetadata
+  >
 > {
   return blockRunnerPlugin<
     WordComplexityResponse,

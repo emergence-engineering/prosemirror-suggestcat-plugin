@@ -10,7 +10,9 @@
     "prefer-template": "warn",
     "no-plusplus": "off",
     "no-restricted-syntax": "off",
-    "prefer-destructuring": "warn"
+    "prefer-destructuring": "warn",
+    "import/export": "warn",
+    "guard-for-in": "warn"
   },
   "env": {
     "browser": true

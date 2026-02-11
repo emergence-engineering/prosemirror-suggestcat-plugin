@@ -97,6 +97,8 @@ export function clearError(view: EditorView): void {
 /**
  * Get the current plugin state
  */
-export function getCompleteState(view: EditorView): CompleteV2State | undefined {
+export function getCompleteState(
+  view: EditorView,
+): CompleteV2State | undefined {
   return completeV2Key.getState(view.state);
 }

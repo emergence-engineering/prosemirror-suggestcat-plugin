@@ -218,14 +218,24 @@ describe("updateUnit", () => {
     const unitId1 = {};
     const unitId2 = {};
     const units = [
-      createProcessingUnit({ id: unitId1, status: UnitStatus.QUEUED, text: "first" }),
-      createProcessingUnit({ id: unitId2, status: UnitStatus.QUEUED, text: "second" }),
+      createProcessingUnit({
+        id: unitId1,
+        status: UnitStatus.QUEUED,
+        text: "first",
+      }),
+      createProcessingUnit({
+        id: unitId2,
+        status: UnitStatus.QUEUED,
+        text: "second",
+      }),
     ];
     const state = createActiveState<TestResponse, TestContext, TestMetadata>({
       unitsInProgress: units,
     });
 
-    const newState = updateUnit(state, unitId1, { status: UnitStatus.PROCESSING });
+    const newState = updateUnit(state, unitId1, {
+      status: UnitStatus.PROCESSING,
+    });
 
     expect(newState.unitsInProgress[0].status).toBe(UnitStatus.PROCESSING);
     expect(newState.unitsInProgress[0].text).toBe("first");
@@ -235,13 +245,17 @@ describe("updateUnit", () => {
 
   it("returns unchanged state for non-existent ID", () => {
     const unitId = {};
-    const units = [createProcessingUnit({ id: unitId, status: UnitStatus.QUEUED })];
+    const units = [
+      createProcessingUnit({ id: unitId, status: UnitStatus.QUEUED }),
+    ];
     const state = createActiveState<TestResponse, TestContext, TestMetadata>({
       unitsInProgress: units,
     });
 
     const nonExistentId = {};
-    const newState = updateUnit(state, nonExistentId, { status: UnitStatus.PROCESSING });
+    const newState = updateUnit(state, nonExistentId, {
+      status: UnitStatus.PROCESSING,
+    });
 
     expect(newState.unitsInProgress[0].status).toBe(UnitStatus.QUEUED);
   });
@@ -249,7 +263,12 @@ describe("updateUnit", () => {
   it("can update multiple fields at once", () => {
     const unitId = {};
     const units = [
-      createProcessingUnit({ id: unitId, status: UnitStatus.QUEUED, retryCount: 0, waitUntil: 0 }),
+      createProcessingUnit({
+        id: unitId,
+        status: UnitStatus.QUEUED,
+        retryCount: 0,
+        waitUntil: 0,
+      }),
     ];
     const state = createActiveState<TestResponse, TestContext, TestMetadata>({
       unitsInProgress: units,
@@ -283,8 +302,8 @@ describe("updateUnit", () => {
     const newState = updateUnit(state, unitId1, { waitUntil: 5000 });
 
     expect(newState.unitsInProgress[0].text).toBe("second"); // waitUntil: 2000
-    expect(newState.unitsInProgress[1].text).toBe("third");  // waitUntil: 3000
-    expect(newState.unitsInProgress[2].text).toBe("first");  // waitUntil: 5000
+    expect(newState.unitsInProgress[1].text).toBe("third"); // waitUntil: 3000
+    expect(newState.unitsInProgress[2].text).toBe("first"); // waitUntil: 5000
   });
 
   it("does not sort when updating fields other than waitUntil", () => {
@@ -299,9 +318,11 @@ describe("updateUnit", () => {
     });
 
     // Update status only - should not trigger sort
-    const newState = updateUnit(state, unitId1, { status: UnitStatus.PROCESSING });
+    const newState = updateUnit(state, unitId1, {
+      status: UnitStatus.PROCESSING,
+    });
 
-    expect(newState.unitsInProgress[0].text).toBe("first");  // Order preserved
+    expect(newState.unitsInProgress[0].text).toBe("first"); // Order preserved
     expect(newState.unitsInProgress[1].text).toBe("second");
   });
 });

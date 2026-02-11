@@ -24,7 +24,9 @@ import {
 } from "./streaming";
 
 // Plugin key for accessing state
-export const autoCompleteKey = new PluginKey<AutoCompleteState>("autoCompletePlugin");
+export const autoCompleteKey = new PluginKey<AutoCompleteState>(
+  "autoCompletePlugin",
+);
 
 // Initial state
 const initialState: AutoCompleteState = {
@@ -154,7 +156,7 @@ function isTextInput(tr: Transaction): boolean {
   if (!tr.docChanged) return false;
 
   // Check if this is a simple insertion
-  const steps = tr.steps;
+  const { steps } = tr;
   if (steps.length !== 1) return false;
 
   const step = steps[0];
@@ -197,7 +199,9 @@ export function autoCompletePlugin(
       },
 
       apply(tr, pluginState, _oldState, newState): AutoCompleteState {
-        const action = tr.getMeta(autoCompleteKey) as AutoCompleteAction | undefined;
+        const action = tr.getMeta(autoCompleteKey) as
+          | AutoCompleteAction
+          | undefined;
 
         if (action) {
           return reducer(pluginState, action);
@@ -340,14 +344,14 @@ export function autoCompletePlugin(
           }
 
           // Detect text input and start debounce
-          const tr = view.state.tr;
+          const { tr } = view.state;
           if (
             view.state.doc !== prevState.doc &&
             prevPluginState?.status !== AutoCompleteStatus.PENDING &&
             prevPluginState?.status !== AutoCompleteStatus.STREAMING
           ) {
             // Check if this looks like a text input (not a paste or programmatic change)
-            const lastTr = (view.state as never)["tr"];
+            const lastTr = (view.state as never).tr;
 
             // Reset any existing timer
             if (debounceTimer) {

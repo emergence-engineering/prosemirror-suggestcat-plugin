@@ -25,7 +25,10 @@ const initialState: CompleteV2State = {
 /**
  * State reducer - handles all state transitions
  */
-function reducer(state: CompleteV2State, action: CompleteAction): CompleteV2State {
+function reducer(
+  state: CompleteV2State,
+  action: CompleteAction,
+): CompleteV2State {
   switch (action.type) {
     case CompleteActionType.SET_ENABLED:
       return {
@@ -151,7 +154,9 @@ function applyResult(view: EditorView, state: CompleteV2State): void {
         );
         const fragment = Fragment.fromArray(paragraphNodes);
 
-        tr = tr.setSelection(TextSelection.create(view.state.doc, selection.from, selection.to));
+        tr = tr.setSelection(
+          TextSelection.create(view.state.doc, selection.from, selection.to),
+        );
         tr.selection.replace(tr, new Slice(fragment, 0, 0));
       }
       break;
@@ -252,8 +257,15 @@ export function completePluginV2(
           if (!pluginState || !pluginState.enabled) return;
 
           // Handle PENDING state - start the request
-          if (pluginState.status === CompleteStatus.PENDING && !isRequestInFlight) {
-            const { text, error } = getTextForTask(view, pluginState, maxSelection);
+          if (
+            pluginState.status === CompleteStatus.PENDING &&
+            !isRequestInFlight
+          ) {
+            const { text, error } = getTextForTask(
+              view,
+              pluginState,
+              maxSelection,
+            );
 
             if (error) {
               view.dispatch(

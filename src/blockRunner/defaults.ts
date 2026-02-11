@@ -32,7 +32,7 @@ export const defaultRunnerOptions: RunnerOptions = {
   },
 
   // UI callbacks (noop by default)
-  forceRerender: () => {},
+  forceRerender: () => undefined,
   onUpdate: undefined,
 };
 

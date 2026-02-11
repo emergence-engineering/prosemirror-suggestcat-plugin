@@ -30,7 +30,11 @@ export const randomProcessorKey = createBlockRunnerKey<
 export function createRandomProcessorPlugin(
   initialContext: Partial<RandomProcessorContext> = {},
 ): Plugin<
-  RunnerState<RandomProcessorResponse, RandomProcessorContext, RandomProcessorMetadata>
+  RunnerState<
+    RandomProcessorResponse,
+    RandomProcessorContext,
+    RandomProcessorMetadata
+  >
 > {
   return blockRunnerPlugin<
     RandomProcessorResponse,

@@ -35,11 +35,19 @@ export interface GrammarProcessorOptions {
 }
 
 // Create processor with API options
-export const createGrammarProcessor = (options: GrammarProcessorOptions | string) => {
+export const createGrammarProcessor = (
+  options: GrammarProcessorOptions | string,
+) => {
   // Support both old (string) and new (object) API
-  const { apiKey, apiEndpoint, model, modelStateManager } = typeof options === "string"
-    ? { apiKey: options, apiEndpoint: undefined, model: undefined, modelStateManager: undefined }
-    : options;
+  const { apiKey, apiEndpoint, model, modelStateManager } =
+    typeof options === "string"
+      ? {
+          apiKey: options,
+          apiEndpoint: undefined,
+          model: undefined,
+          modelStateManager: undefined,
+        }
+      : options;
 
   return async (
     _view: EditorView,

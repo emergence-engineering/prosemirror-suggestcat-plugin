@@ -25,7 +25,9 @@ const mockDecorationFactory: DecorationFactory<TestResponse, TestMetadata> = (
   response: TestResponse,
   unit: ProcessingUnit<TestMetadata>,
 ): ResultDecoration<TestResponse>[] => {
-  return [createResultDecoration(unit.from, unit.to, response, { unitId: unit.id })];
+  return [
+    createResultDecoration(unit.from, unit.to, response, { unitId: unit.id }),
+  ];
 };
 
 // Mock EditorState (minimal for non-INIT actions)
@@ -34,9 +36,16 @@ const mockEditorState = {} as EditorState;
 describe("createInitialState", () => {
   it("returns IDLE state with given context and options", () => {
     const context: TestContext = { enabled: true };
-    const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>();
+    const options = createRunnerOptions<
+      TestResponse,
+      TestContext,
+      TestMetadata
+    >();
 
-    const state = createInitialState<TestResponse, TestContext, TestMetadata>(context, options);
+    const state = createInitialState<TestResponse, TestContext, TestMetadata>(
+      context,
+      options,
+    );
 
     expect(state.status).toBe(RunnerStatus.IDLE);
     expect(state.decorations).toEqual([]);
@@ -50,7 +59,9 @@ describe("handleAction", () => {
   describe("UNIT_STARTED", () => {
     it("changes unit status to PROCESSING", () => {
       const unitId = {};
-      const units = [createProcessingUnit({ id: unitId, status: UnitStatus.QUEUED })];
+      const units = [
+        createProcessingUnit({ id: unitId, status: UnitStatus.QUEUED }),
+      ];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
@@ -70,7 +81,13 @@ describe("handleAction", () => {
 
     it("captures requestText when processing starts", () => {
       const unitId = {};
-      const units = [createProcessingUnit({ id: unitId, status: UnitStatus.QUEUED, text: "original text" })];
+      const units = [
+        createProcessingUnit({
+          id: unitId,
+          status: UnitStatus.QUEUED,
+          text: "original text",
+        }),
+      ];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
       });
@@ -107,7 +124,12 @@ describe("handleAction", () => {
     it("changes unit status to DONE and adds decorations", () => {
       const unitId = {};
       const units = [
-        createProcessingUnit({ id: unitId, status: UnitStatus.PROCESSING, from: 0, to: 10 }),
+        createProcessingUnit({
+          id: unitId,
+          status: UnitStatus.PROCESSING,
+          from: 0,
+          to: 10,
+        }),
       ];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
@@ -168,8 +190,16 @@ describe("handleAction", () => {
       try {
         const unitId = {};
         const debounceDelay = 300;
-        const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
-          dirtyHandling: { shouldRecalculate: true, debounceDelay, skipDirtyOnSelfChange: true },
+        const options = createRunnerOptions<
+          TestResponse,
+          TestContext,
+          TestMetadata
+        >({
+          dirtyHandling: {
+            shouldRecalculate: true,
+            debounceDelay,
+            skipDirtyOnSelfChange: true,
+          },
         });
         const units = [
           createProcessingUnit({
@@ -181,7 +211,11 @@ describe("handleAction", () => {
             requestText: "original text",
           }),
         ];
-        const state = createActiveState<TestResponse, TestContext, TestMetadata>({
+        const state = createActiveState<
+          TestResponse,
+          TestContext,
+          TestMetadata
+        >({
           unitsInProgress: units,
           decorations: [],
           options,
@@ -200,7 +234,9 @@ describe("handleAction", () => {
           expect(newState.unitsInProgress[0].status).toBe(UnitStatus.DIRTY);
           expect(newState.decorations.length).toBe(0);
           expect(newState.unitsInProgress[0].requestText).toBeUndefined();
-          expect(newState.unitsInProgress[0].waitUntil).toBe(1000 + debounceDelay);
+          expect(newState.unitsInProgress[0].waitUntil).toBe(
+            1000 + debounceDelay,
+          );
         }
       } finally {
         restoreDate();
@@ -227,21 +263,37 @@ describe("handleAction", () => {
       const restoreDate = mockDateNow(1000);
       try {
         const unitId = {};
-        const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
+        const options = createRunnerOptions<
+          TestResponse,
+          TestContext,
+          TestMetadata
+        >({
           maxRetries: 3,
           backoffBase: 1000,
         });
         const units = [
-          createProcessingUnit({ id: unitId, status: UnitStatus.PROCESSING, retryCount: 0 }),
+          createProcessingUnit({
+            id: unitId,
+            status: UnitStatus.PROCESSING,
+            retryCount: 0,
+          }),
         ];
-        const state = createActiveState<TestResponse, TestContext, TestMetadata>({
+        const state = createActiveState<
+          TestResponse,
+          TestContext,
+          TestMetadata
+        >({
           unitsInProgress: units,
           options,
         });
 
         const newState = handleAction(
           state,
-          { type: ActionType.UNIT_ERROR, unitId, error: new Error("test error") },
+          {
+            type: ActionType.UNIT_ERROR,
+            unitId,
+            error: new Error("test error"),
+          },
           mockDecorationFactory,
           mockEditorState,
         );
@@ -259,11 +311,19 @@ describe("handleAction", () => {
 
     it("sets ERROR when retries >= maxRetries", () => {
       const unitId = {};
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >({
         maxRetries: 3,
       });
       const units = [
-        createProcessingUnit({ id: unitId, status: UnitStatus.PROCESSING, retryCount: 2 }),
+        createProcessingUnit({
+          id: unitId,
+          status: UnitStatus.PROCESSING,
+          retryCount: 2,
+        }),
       ];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
@@ -289,9 +349,17 @@ describe("handleAction", () => {
       try {
         const unitId = {};
         const debounceDelay = 300;
-        const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
+        const options = createRunnerOptions<
+          TestResponse,
+          TestContext,
+          TestMetadata
+        >({
           maxRetries: 3,
-          dirtyHandling: { shouldRecalculate: true, debounceDelay, skipDirtyOnSelfChange: true },
+          dirtyHandling: {
+            shouldRecalculate: true,
+            debounceDelay,
+            skipDirtyOnSelfChange: true,
+          },
         });
         const units = [
           createProcessingUnit({
@@ -302,14 +370,22 @@ describe("handleAction", () => {
             requestText: "original text",
           }),
         ];
-        const state = createActiveState<TestResponse, TestContext, TestMetadata>({
+        const state = createActiveState<
+          TestResponse,
+          TestContext,
+          TestMetadata
+        >({
           unitsInProgress: units,
           options,
         });
 
         const newState = handleAction(
           state,
-          { type: ActionType.UNIT_ERROR, unitId, error: new Error("stale error") },
+          {
+            type: ActionType.UNIT_ERROR,
+            unitId,
+            error: new Error("stale error"),
+          },
           mockDecorationFactory,
           mockEditorState,
         );
@@ -319,7 +395,9 @@ describe("handleAction", () => {
           expect(newState.unitsInProgress[0].status).toBe(UnitStatus.DIRTY);
           expect(newState.unitsInProgress[0].retryCount).toBe(0); // Not incremented
           expect(newState.unitsInProgress[0].requestText).toBeUndefined();
-          expect(newState.unitsInProgress[0].waitUntil).toBe(1000 + debounceDelay);
+          expect(newState.unitsInProgress[0].waitUntil).toBe(
+            1000 + debounceDelay,
+          );
         }
       } finally {
         restoreDate();
@@ -328,11 +406,19 @@ describe("handleAction", () => {
 
     it("increments retryCount on each error", () => {
       const unitId = {};
-      const options = createRunnerOptions<TestResponse, TestContext, TestMetadata>({
+      const options = createRunnerOptions<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >({
         maxRetries: 5,
       });
       const units = [
-        createProcessingUnit({ id: unitId, status: UnitStatus.PROCESSING, retryCount: 2 }),
+        createProcessingUnit({
+          id: unitId,
+          status: UnitStatus.PROCESSING,
+          retryCount: 2,
+        }),
       ];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
         unitsInProgress: units,
@@ -430,7 +516,12 @@ describe("handleAction", () => {
       const decorationId = {};
       const otherId = {};
       const decorations = [
-        createResultDecoration(0, 5, { result: "remove" }, { id: decorationId }),
+        createResultDecoration(
+          0,
+          5,
+          { result: "remove" },
+          { id: decorationId },
+        ),
         createResultDecoration(10, 15, { result: "keep" }, { id: otherId }),
       ];
       const state = createActiveState<TestResponse, TestContext, TestMetadata>({
@@ -487,7 +578,11 @@ describe("handleAction", () => {
 
   describe("unknown action", () => {
     it("returns unchanged state", () => {
-      const state = createActiveState<TestResponse, TestContext, TestMetadata>();
+      const state = createActiveState<
+        TestResponse,
+        TestContext,
+        TestMetadata
+      >();
 
       const newState = handleAction(
         state,

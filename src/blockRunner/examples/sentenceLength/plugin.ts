@@ -26,7 +26,11 @@ export const sentenceLengthKey = createBlockRunnerKey<
 export function createSentenceLengthPlugin(
   initialContext: Partial<SentenceLengthContext> = {},
 ): Plugin<
-  RunnerState<SentenceLengthResponse, SentenceLengthContext, SentenceLengthMetadata>
+  RunnerState<
+    SentenceLengthResponse,
+    SentenceLengthContext,
+    SentenceLengthMetadata
+  >
 > {
   return blockRunnerPlugin<
     SentenceLengthResponse,

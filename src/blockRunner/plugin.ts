@@ -30,7 +30,11 @@ export interface BlockRunnerPluginConfig<
   decorationFactory: DecorationFactory<ResponseType, UnitMetadata>;
 
   // Optional transformers
-  decorationTransformer?: DecorationTransformer<ResponseType, ContextState, UnitMetadata>;
+  decorationTransformer?: DecorationTransformer<
+    ResponseType,
+    ContextState,
+    UnitMetadata
+  >;
   widgetFactory?: WidgetFactory<UnitMetadata>;
 
   // Initial state
@@ -78,23 +82,37 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
         );
       },
 
-      apply(tr, state, oldEditorState, newEditorState): RunnerState<ResponseType, ContextState, UnitMetadata> {
+      apply(
+        tr,
+        state,
+        oldEditorState,
+        newEditorState,
+      ): RunnerState<ResponseType, ContextState, UnitMetadata> {
         // Handle dispatched actions - check for action first to detect self-calls
         const action = tr.getMeta(pluginKey);
 
         // Detect self-change: docChanged AND plugin meta present
         const isSelfChange = tr.docChanged && action !== undefined;
-        const shouldSkipDirty = isSelfChange && mergedOptions.dirtyHandling.skipDirtyOnSelfChange;
+        const shouldSkipDirty =
+          isSelfChange && mergedOptions.dirtyHandling.skipDirtyOnSelfChange;
+
+        let newState = state;
 
         // Handle document changes - remap positions
         if (tr.docChanged) {
-          state = remapPositions(state, tr, oldEditorState, mergedOptions, shouldSkipDirty);
+          newState = remapPositions(
+            state,
+            tr,
+            oldEditorState,
+            mergedOptions,
+            shouldSkipDirty,
+          );
         }
 
         // Handle dispatched actions
         if (action) {
           const newPluginState = handleAction(
-            state,
+            newState,
             action,
             decorationFactory,
             newEditorState,
@@ -108,7 +126,7 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
           return newPluginState;
         }
 
-        return state;
+        return newState;
       },
     },
 
@@ -119,12 +137,9 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
 
         console.log("decorations", state.decorations.length);
         // Filter visible decorations
-        let decorations: ResultDecoration<ResponseType>[] = state.decorations
-          .filter((d) =>
-            mergedOptions.visibilityFilter(
-              d,
-              state.contextState,
-            ),
+        let decorations: ResultDecoration<ResponseType>[] =
+          state.decorations.filter((d) =>
+            mergedOptions.visibilityFilter(d, state.contextState),
           );
 
         console.log("decorations VF", decorations.length);
@@ -139,7 +154,10 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
         if (widgetFactory && state.unitsInProgress) {
           for (const unit of state.unitsInProgress) {
             // Show widgets for non-finished units
-            if (unit.status !== UnitStatus.DONE && unit.status !== UnitStatus.ERROR) {
+            if (
+              unit.status !== UnitStatus.DONE &&
+              unit.status !== UnitStatus.ERROR
+            ) {
               const widget = widgetFactory(unit);
               if (widget) widgets.push(widget);
             }
@@ -152,7 +170,7 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
         ]);
       },
 
-      handleKeyDown: handleKeyDown,
+      handleKeyDown,
     },
 
     view() {
@@ -169,23 +187,27 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
           ) {
             isRunning = true;
 
-            executeParallel(pluginKey, view, unitProcessor, mergedOptions)
-              .finally(() => {
-                isRunning = false;
+            executeParallel(
+              pluginKey,
+              view,
+              unitProcessor,
+              mergedOptions,
+            ).finally(() => {
+              isRunning = false;
 
-                // Check if we should dispatch FINISH
-                // Only auto-finish if shouldRecalculate is false
-                // (if true, stay ACTIVE so dirty units can be reprocessed)
-                const currentState = pluginKey.getState(view.state);
-                if (
-                  currentState &&
-                  currentState.status === RunnerStatus.ACTIVE &&
-                  !hasUnitsToProcess(currentState) &&
-                  !mergedOptions.dirtyHandling.shouldRecalculate
-                ) {
-                  dispatchAction(view, pluginKey, { type: ActionType.FINISH });
-                }
-              });
+              // Check if we should dispatch FINISH
+              // Only auto-finish if shouldRecalculate is false
+              // (if true, stay ACTIVE so dirty units can be reprocessed)
+              const currentState = pluginKey.getState(view.state);
+              if (
+                currentState &&
+                currentState.status === RunnerStatus.ACTIVE &&
+                !hasUnitsToProcess(currentState) &&
+                !mergedOptions.dirtyHandling.shouldRecalculate
+              ) {
+                dispatchAction(view, pluginKey, { type: ActionType.FINISH });
+              }
+            });
           }
         },
       };
@@ -197,5 +219,7 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
 export function createBlockRunnerKey<ResponseType, ContextState, UnitMetadata>(
   name: string,
 ): PluginKey<RunnerState<ResponseType, ContextState, UnitMetadata>> {
-  return new PluginKey<RunnerState<ResponseType, ContextState, UnitMetadata>>(name);
+  return new PluginKey<RunnerState<ResponseType, ContextState, UnitMetadata>>(
+    name,
+  );
 }

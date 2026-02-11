@@ -45,7 +45,9 @@ export function createRunnerOptions<
   ContextState = TestContext,
   UnitMetadata = TestMetadata,
 >(
-  overrides: Partial<RunnerOptions<ResponseType, ContextState, UnitMetadata>> = {},
+  overrides: Partial<
+    RunnerOptions<ResponseType, ContextState, UnitMetadata>
+  > = {},
 ): RunnerOptions<ResponseType, ContextState, UnitMetadata> {
   return {
     nodeTypes: overrides.nodeTypes ?? "paragraph",
@@ -61,7 +63,7 @@ export function createRunnerOptions<
       skipDirtyOnSelfChange: true,
     },
     defaultMetadataFactory: overrides.defaultMetadataFactory,
-    forceRerender: overrides.forceRerender ?? (() => {}),
+    forceRerender: overrides.forceRerender ?? (() => undefined),
     onUpdate: overrides.onUpdate,
   };
 }
@@ -72,14 +74,18 @@ export function createIdleState<
   ContextState = TestContext,
   UnitMetadata = TestMetadata,
 >(
-  overrides: Partial<RunnerStateIdle<ResponseType, ContextState, UnitMetadata>> = {},
+  overrides: Partial<
+    RunnerStateIdle<ResponseType, ContextState, UnitMetadata>
+  > = {},
 ): RunnerStateIdle<ResponseType, ContextState, UnitMetadata> {
   return {
     status: RunnerStatus.IDLE,
     decorations: overrides.decorations ?? [],
     selected: overrides.selected,
     contextState: overrides.contextState ?? ({ enabled: true } as ContextState),
-    options: overrides.options ?? createRunnerOptions<ResponseType, ContextState, UnitMetadata>(),
+    options:
+      overrides.options ??
+      createRunnerOptions<ResponseType, ContextState, UnitMetadata>(),
   };
 }
 
@@ -89,15 +95,21 @@ export function createActiveState<
   ContextState = TestContext,
   UnitMetadata = TestMetadata,
 >(
-  overrides: Partial<RunnerStateActive<ResponseType, ContextState, UnitMetadata>> = {},
+  overrides: Partial<
+    RunnerStateActive<ResponseType, ContextState, UnitMetadata>
+  > = {},
 ): RunnerStateActive<ResponseType, ContextState, UnitMetadata> {
   return {
     status: RunnerStatus.ACTIVE,
-    unitsInProgress: overrides.unitsInProgress ?? [createProcessingUnit<UnitMetadata>()],
+    unitsInProgress: overrides.unitsInProgress ?? [
+      createProcessingUnit<UnitMetadata>(),
+    ],
     decorations: overrides.decorations ?? [],
     selected: overrides.selected,
     contextState: overrides.contextState ?? ({ enabled: true } as ContextState),
-    options: overrides.options ?? createRunnerOptions<ResponseType, ContextState, UnitMetadata>(),
+    options:
+      overrides.options ??
+      createRunnerOptions<ResponseType, ContextState, UnitMetadata>(),
   };
 }
 
@@ -116,7 +128,12 @@ export function createResultDecoration<ResponseType = TestResponse>(
     ...specOverrides,
   };
 
-  return Decoration.inline(from, to, { class: "test-decoration" }, spec) as ResultDecoration<ResponseType>;
+  return Decoration.inline(
+    from,
+    to,
+    { class: "test-decoration" },
+    spec,
+  ) as ResultDecoration<ResponseType>;
 }
 
 // Mock Date.now() utility
@@ -135,14 +152,20 @@ export function createState<
   UnitMetadata = TestMetadata,
 >(
   type: "idle" | "active",
-  overrides: Partial<RunnerState<ResponseType, ContextState, UnitMetadata>> = {},
+  overrides: Partial<
+    RunnerState<ResponseType, ContextState, UnitMetadata>
+  > = {},
 ): RunnerState<ResponseType, ContextState, UnitMetadata> {
   if (type === "idle") {
     return createIdleState<ResponseType, ContextState, UnitMetadata>(
-      overrides as Partial<RunnerStateIdle<ResponseType, ContextState, UnitMetadata>>,
+      overrides as Partial<
+        RunnerStateIdle<ResponseType, ContextState, UnitMetadata>
+      >,
     );
   }
   return createActiveState<ResponseType, ContextState, UnitMetadata>(
-    overrides as Partial<RunnerStateActive<ResponseType, ContextState, UnitMetadata>>,
+    overrides as Partial<
+      RunnerStateActive<ResponseType, ContextState, UnitMetadata>
+    >,
   );
 }

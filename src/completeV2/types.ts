@@ -1,5 +1,7 @@
 import { TextSelection } from "prosemirror-state";
 
+import type { TaskType, TaskParams } from "../types";
+
 // Re-export common types from main types file
 export {
   AiPromptsWithoutParam,
@@ -13,8 +15,6 @@ export {
   type TaskParams,
   type TaskType,
 } from "../types";
-
-import type { TaskType, TaskParams } from "../types";
 
 // Status enum for the state machine
 export enum CompleteStatus {

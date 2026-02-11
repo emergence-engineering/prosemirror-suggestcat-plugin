@@ -38,11 +38,7 @@ export type {
 } from "./types";
 
 // Enums (runtime values, use regular export)
-export {
-  RunnerStatus,
-  UnitStatus,
-  ActionType,
-} from "./types";
+export { RunnerStatus, UnitStatus, ActionType } from "./types";
 
 // Defaults
 export { defaultRunnerOptions, mergeOptions } from "./defaults";

@@ -29,7 +29,10 @@ export const grammarSuggestPluginKey = new PluginKey<GrammarSuggestPluginState>(
 );
 
 // Helper to toggle grammar suggest plugin
-export const setGrammarSuggestEnabled = (view: EditorView, enabled: boolean) => {
+export const setGrammarSuggestEnabled = (
+  view: EditorView,
+  enabled: boolean,
+) => {
   view.dispatch(
     view.state.tr.setMeta(grammarSuggestPluginKey, {
       type: GrammarSuggestMetaType.setEnabled,
