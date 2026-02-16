@@ -1,64 +1,163 @@
-.cm-editor.cm-focused {
-  outline: none;
+/* Grammar Suggestion V2 styles */
+
+.grammarSuggestionV2 {
+    background-color: rgba(76, 175, 80, 0.3);
+    border-radius: 2px;
+    cursor: pointer;
 }
 
-.grammarSuggestion {
-  background-color: green;
+.grammarSuggestionV2.removalSuggestionV2 {
+    background-color: rgba(244, 67, 54, 0.3);
 }
 
-.removalSuggestion {
-  background-color: red;
+.grammarSuggestionV2-selected {
+    background-color: rgba(33, 150, 243, 0.4);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.5);
 }
 
-.grammar-suggest-tooltip {
-  display: flex;
-  gap: 0.5rem;
-  position: absolute;
-  padding: 5px;
-  border-radius: 5px;
-  z-index: 1000;
-  background: white;
-  height: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+/* Grammar Widget V2 styles */
+
+.grammarWidgetV2 {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%) translateX(-8px);
+    padding: 2px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
 }
 
-.grammar-suggest-tooltip-apply {
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
+.grammarWidgetV2.queued,
+.grammarWidgetV2.processing {
+    background: #e3f2fd;
+    color: #1565c0;
 }
 
-.grammar-suggest-tooltip-apply:hover {
-  background-color: #e6e6e6;
+.grammarWidgetV2.backoff {
+    background: #fff3e0;
+    color: #e65100;
 }
 
-.grammar-suggest-tooltip-discard-content {
-  height: 1.5rem;
-  width: 2rem;
+.grammarWidgetV2.error {
+    background: #ffebee;
+    color: #c62828;
 }
 
-.grammar-suggest-tooltip-discard {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.3rem;
-  height: 2rem;
-  width: 2rem;
-  cursor: pointer;
-  border-radius: 50%;
+/* Grammar Popup V2 styles */
+
+.grammarPopupV2 {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    max-width: 400px;
 }
 
-.grammar-suggest-tooltip-discard > path {
-  fill: grey;
+.grammarPopupV2-mainRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.grammar-suggest-tooltip-discard:hover > path {
-  fill: black;
+.grammarPopupV2-original {
+    color: #c62828;
+    text-decoration: line-through;
 }
 
-.grammar-suggest-tooltip-discard:hover {
-  background: #e6e6e6;
+.grammarPopupV2-arrow {
+    color: #666;
+}
+
+.grammarPopupV2-replacement {
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+.grammarPopupV2-accept,
+.grammarPopupV2-discard {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grammarPopupV2-accept {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.grammarPopupV2-accept:hover {
+    background: #c8e6c9;
+}
+
+.grammarPopupV2-discard {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.grammarPopupV2-discard:hover {
+    background: #ffcdd2;
+}
+
+.grammarPopupV2-hint {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.grammarPopupV2-hint:hover {
+    background: #bbdefb;
+}
+
+.grammarPopupV2-hintArea {
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+}
+
+.grammarPopupV2-hintText {
+    color: #333;
+    line-height: 1.4;
+}
+
+.grammarPopupV2-loading {
+    color: #666;
+    font-style: italic;
+}
+
+.grammarPopupV2-hintError {
+    color: #c62828;
+    font-style: italic;
+}
+
+/* Auto-complete ghost text */
+
+.autoCompleteGhostText {
+    color: #9ca3af;
+    opacity: 0.7;
+    pointer-events: none;
 }
