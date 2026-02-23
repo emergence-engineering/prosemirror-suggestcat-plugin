@@ -123,6 +123,16 @@ export const grammarWidgetFactory: WidgetFactory<GrammarUnitMetadata> = (
   widget.className = className;
   widget.textContent = content;
 
+  if (unit.status === UnitStatus.BACKOFF && waitTime > 0) {
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, unit.waitUntil - Date.now());
+      widget.textContent = `🔄 ${Math.ceil(remaining / 1000)}s`;
+      if (remaining <= 0 || !widget.isConnected) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+
   // Place at unit.from + 1 to be inside the paragraph (not before it)
   // This ensures the widget is a child of the <p>, allowing absolute positioning relative to it
   return Decoration.widget(unit.from + 1, widget, { side: -1 });

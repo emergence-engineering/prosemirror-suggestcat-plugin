@@ -135,19 +135,16 @@ export function blockRunnerPlugin<ResponseType, ContextState, UnitMetadata>(
         const state = pluginKey.getState(editorState);
         if (!state) return DecorationSet.empty;
 
-        console.log("decorations", state.decorations.length);
         // Filter visible decorations
         let decorations: ResultDecoration<ResponseType>[] =
           state.decorations.filter((d) =>
             mergedOptions.visibilityFilter(d, state.contextState),
           );
 
-        console.log("decorations VF", decorations.length);
         // Transform decorations (e.g., highlight selected)
         if (decorationTransformer) {
           decorations = decorationTransformer(decorations, state);
         }
-        console.log("after transformer", decorations.length);
 
         // Add loading widgets for processing units (including DIRTY when paused)
         const widgets: Decoration[] = [];

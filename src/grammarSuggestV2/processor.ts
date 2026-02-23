@@ -68,12 +68,15 @@ export const createGrammarProcessor = (
       // Handle model state based on result
       if (result.error) {
         modelStateManager?.handleFailure();
-      } else {
-        modelStateManager?.handleSuccess();
+        return {
+          error: new Error("Grammar API error"),
+        };
       }
 
+      modelStateManager?.handleSuccess();
+
       if (!result.fixed) {
-        // No fixes needed (or error occurred)
+        // No fixes needed
         return {
           data: {
             fixed: false,

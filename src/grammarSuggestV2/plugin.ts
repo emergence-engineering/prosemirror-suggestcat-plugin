@@ -221,6 +221,11 @@ export function grammarSuggestPluginV2(
           ? (decorationsFn.call(basePlugin, editorState) as DecorationSet)
           : DecorationSet.empty;
 
+        // When createPopup is "react", skip widget creation — React handles the popup
+        if (createPopup === "react") {
+          return baseDecorations;
+        }
+
         const state = grammarSuggestV2Key.getState(editorState);
         if (!state?.contextState.selectedSuggestionId) {
           return baseDecorations;

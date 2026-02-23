@@ -43,14 +43,16 @@ export interface GrammarSuggestV2Options {
   maxRetries?: number; // Default: 3
   backoffBase?: number; // Default: 2000
   debounceMs?: number; // Default: 1000
-  createPopup?: (
-    view: EditorView,
-    decoration: Decoration,
-    pos: number,
-    applySuggestion: () => void,
-    discardSuggestion: () => void,
-    requestHint: () => Promise<string>,
-  ) => HTMLElement;
+  createPopup?:
+    | "react"
+    | ((
+        view: EditorView,
+        decoration: Decoration,
+        pos: number,
+        applySuggestion: () => void,
+        discardSuggestion: () => void,
+        requestHint: () => Promise<string>,
+      ) => HTMLElement);
 }
 
 // Decoration spec for grammar suggestions

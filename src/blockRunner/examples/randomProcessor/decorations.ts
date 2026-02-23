@@ -101,6 +101,19 @@ export const randomProcessorWidgetFactory: WidgetFactory<
   const widget = document.createElement("span");
   widget.className = className;
   widget.textContent = content;
+
+  if (unit.status === UnitStatus.BACKOFF && waitTime > 0) {
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, unit.waitUntil - Date.now());
+      widget.textContent = `🔄 Retry in ${Math.ceil(
+        remaining / 1000,
+      )}s (attempt ${unit.retryCount + 1})`;
+      if (remaining <= 0 || !widget.isConnected) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+
   widget.style.cssText = `
     display: inline-block;
     padding: 2px 8px;
