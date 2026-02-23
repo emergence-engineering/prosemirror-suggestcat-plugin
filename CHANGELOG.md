@@ -1,5 +1,11 @@
 # prosemirror-suggestcat-plugin
 
+## 2.2.0
+
+### Minor Changes
+
+- better fallback, better popup
+
 ## 2.1.0
 
 ### Minor Changes
